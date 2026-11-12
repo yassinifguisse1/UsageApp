@@ -43,9 +43,11 @@ final class PanelController {
             onHover: { [weak self] provider, inside in self?.hover(provider, inside: inside) },
             onClick: { [weak self] provider in self?.toggleDetails(provider) },
             onOpenMenu: { [weak self] anchor in
-                guard let self else { return }
+                guard let self, isShown, presentation.isRevealed, !menuOpen else { return }
                 if model.pinnedProvider == nil { closeCard() }
                 // The menu tracks synchronously. Keep the rail out until it closes.
+                concealing?.cancel()
+                concealing = nil
                 menuOpen = true
                 onOpenMenu(anchor)
                 menuOpen = false

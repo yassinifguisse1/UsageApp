@@ -71,10 +71,6 @@ struct UsageRail: View {
             }
 
             RailMenuButton(onOpen: onOpenMenu)
-                .modifier(Entrance(
-                    revealed: presentation.isRevealed,
-                    delay: Self.entranceDelay(at: model.visibleProviders.count)
-                ))
                 .frame(width: Self.menuButtonSize, height: Self.menuButtonSize)
                 .background {
                     Circle()
@@ -82,6 +78,8 @@ struct UsageRail: View {
                         .frame(width: 32, height: 32)
                         .allowsHitTesting(false)
                         .accessibilityHidden(true)
+                }
+                .background {
                     AlwaysHover { menuHovered = $0 }
                 }
                 .overlay(alignment: .top) {
@@ -166,47 +164,17 @@ struct EdgeTab: View {
     }
 }
 
-/// The gear is a SwiftUI button so the whole highlighted slot takes the click. A borderless
-/// image-only NSButton only tracks clicks on its icon.
-private struct RailMenuButton: View {
+private struct RailMenuButton: NSViewRepresentable {
     let onOpen: (NSView) -> Void
-    @State private var anchor = MenuAnchor()
 
-    var body: some View {
-        Button(action: open) {
-            Label("UsageApp Menu", systemImage: "gearshape")
-                .labelStyle(.iconOnly)
-                .font(.system(size: 16, weight: .medium))
-                .foregroundStyle(HUDPalette.text)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .contentShape(.rect)
-        }
-        .buttonStyle(.plain)
-        .help("Show UsageApp Menu")
-        .background { MenuAnchorView(anchor: anchor) }
+    func makeNSView(context: Context) -> RailMenuControl {
+        let button = RailMenuControl(onOpen: onOpen)
+        button.contentTintColor = NSColor(HUDPalette.text)
+        return button
     }
 
-    private func open() {
-        if let view = anchor.view { onOpen(view) }
-    }
-}
-
-/// Holds the AppKit view the menu is positioned against.
-private final class MenuAnchor {
-    weak var view: NSView?
-}
-
-private struct MenuAnchorView: NSViewRepresentable {
-    let anchor: MenuAnchor
-
-    func makeNSView(context: Context) -> NSView {
-        let view = NSView()
-        anchor.view = view
-        return view
-    }
-
-    func updateNSView(_ view: NSView, context: Context) {
-        anchor.view = view
+    func updateNSView(_ button: RailMenuControl, context: Context) {
+        button.onOpen = onOpen
     }
 }
 
