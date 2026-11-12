@@ -135,9 +135,16 @@ import UsageCore
     model.setProvider(.codex, shown: false)
     model.setProvider(.perplexity, shown: false)
     #expect(model.visibleProviders == [.perplexity])
+    #expect(model.panelPlacement == .right)
+    var placementChanges = 0
+    model.onPanelSettingsChanged = { placementChanges += 1 }
+    model.panelPlacement = .notch
+    model.panelPlacement = .notch
+    #expect(placementChanges == 1)
     let restored = UsageModel(defaults: defaults, claudeInstaller: testInstaller())
     #expect(restored.visibleProviders == [.perplexity])
     #expect(restored.alertsEnabled)
+    #expect(restored.panelPlacement == .notch)
 }
 
 private actor DeferredProvider {

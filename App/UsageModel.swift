@@ -2,6 +2,21 @@ import Foundation
 import Observation
 import UsageCore
 
+/// Where the panel sits on its display.
+enum PanelPlacement: String, CaseIterable {
+    case right, left
+    /// Top center, hanging from the camera housing. Displays without one get a pill in the menu bar.
+    case notch
+
+    var title: String {
+        switch self {
+        case .right: "Right Edge"
+        case .left: "Left Edge"
+        case .notch: "Notch"
+        }
+    }
+}
+
 @MainActor @Observable
 final class UsageModel {
     private(set) var isDemo: Bool
@@ -39,6 +54,13 @@ final class UsageModel {
     var revealsPanelOnHover: Bool {
         didSet {
             defaults.set(revealsPanelOnHover, forKey: "revealsPanelOnHover")
+            onPanelSettingsChanged?()
+        }
+    }
+    var panelPlacement: PanelPlacement {
+        didSet {
+            guard panelPlacement != oldValue else { return }
+            defaults.set(panelPlacement.rawValue, forKey: "panelPlacement")
             onPanelSettingsChanged?()
         }
     }
@@ -94,6 +116,7 @@ final class UsageModel {
         codexRefreshMinutes = defaults.object(forKey: "codexRefreshMinutes") as? Int ?? 2
         checksForUpdates = defaults.object(forKey: "checksForUpdates") as? Bool ?? true
         revealsPanelOnHover = defaults.object(forKey: "revealsPanelOnHover") as? Bool ?? true
+        panelPlacement = defaults.string(forKey: "panelPlacement").flatMap(PanelPlacement.init) ?? .right
         self.claudeInstaller = claudeInstaller
         self.readCodex = readCodex
         self.readClaude = readClaude

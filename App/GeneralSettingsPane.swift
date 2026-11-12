@@ -22,9 +22,13 @@ struct GeneralSettingsPane: View {
                     .settingsFootnote()
             }
 
-            Section("Panel") {
+            Section {
+                Picker("Position", selection: $model.panelPlacement) {
+                    ForEach(PanelPlacement.allCases, id: \.self) { Text($0.title).tag($0) }
+                }
                 Picker("Show the panel", selection: $model.revealsPanelOnHover) {
-                    Text("When pointing at the edge").tag(true)
+                    Text(model.panelPlacement == .notch ? "When pointing at the notch" : "When pointing at the edge")
+                        .tag(true)
                     Text("Always").tag(false)
                 }
                 ForEach(Provider.allCases, id: \.self) { provider in
@@ -39,6 +43,13 @@ struct GeneralSettingsPane: View {
                 }
                 Picker("Check Codex every", selection: $model.codexRefreshMinutes) {
                     ForEach([1, 2, 5], id: \.self) { Text("\($0) min").tag($0) }
+                }
+            } header: {
+                Text("Panel")
+            } footer: {
+                if model.panelPlacement == .notch {
+                    Text("The panel hangs from the notch and shows the busiest reading beside it. On a display without a notch it sits in the middle of the menu bar.")
+                        .settingsFootnote()
                 }
             }
 

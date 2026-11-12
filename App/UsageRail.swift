@@ -6,6 +6,8 @@ import UsageCore
 @MainActor @Observable
 final class RailPresentation {
     var isRevealed = true
+    /// The camera housing the notch bar hangs from. The width is zero on a display without one.
+    var notch = CGSize.zero
     /// The arcs sweep in on the first reveal only. Pointing at the edge is frequent, so later reveals skip it.
     var sweepsArcs = true
 }
@@ -14,7 +16,6 @@ struct UsageRail: View {
     static let width: CGFloat = 76
     private static let lead: CGFloat = 45
     private static let tail: CGFloat = 27
-    private static let menuButtonSize: CGFloat = 44
     static let tileHeight: CGFloat = 78
 
     static func providerHeight(for providers: [Provider]) -> CGFloat {
@@ -22,16 +23,17 @@ struct UsageRail: View {
     }
 
     static func height(for providers: [Provider]) -> CGFloat {
-        providerHeight(for: providers) + menuButtonSize
+        providerHeight(for: providers) + RailGear.size
     }
 
     let model: UsageModel
     let presentation: RailPresentation
+    /// The display edge the rail sits against.
+    let edge: Edge
     let onHover: (Provider, Bool) -> Void
     let onClick: (Provider) -> Void
     let onOpenMenu: (NSView) -> Void
     @State private var hovered: Provider?
-    @State private var menuHovered = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     static func entranceDelay(at index: Int) -> Double { 0.04 + Double(index) * 0.03 }
@@ -55,10 +57,11 @@ struct UsageRail: View {
                         pinned: model.pinnedProvider == provider,
                         showingDetails: model.detailsProvider == provider,
                         revealed: presentation.isRevealed || !presentation.sweepsArcs,
-                        entranceDelay: Self.entranceDelay(at: index)
+                        entranceDelay: Self.entranceDelay(at: index),
+                        pinEdge: edge
                     )
                 }
-                .modifier(Entrance(revealed: presentation.isRevealed, delay: Self.entranceDelay(at: index)))
+                .modifier(Entrance(revealed: presentation.isRevealed, delay: Self.entranceDelay(at: index), from: edge))
                 .buttonStyle(.plain)
                 .frame(height: Self.tileHeight, alignment: .top)
                 .background {
@@ -70,34 +73,13 @@ struct UsageRail: View {
                 }
             }
 
-            Image(systemName: "gearshape")
-                .font(.system(size: 16, weight: .medium))
-                .foregroundStyle(HUDPalette.text)
-                .frame(width: Self.menuButtonSize, height: Self.menuButtonSize)
-                .background {
-                    Circle()
-                        .fill(HUDPalette.track.opacity(menuHovered ? 1 : 0))
-                        .frame(width: 32, height: 32)
-                        .allowsHitTesting(false)
-                        .accessibilityHidden(true)
-                }
-                .background {
-                    RailMenuHover(onHover: { menuHovered = $0 }, onOpen: onOpenMenu)
-                }
-                .accessibilityHidden(true)
-                .overlay(alignment: .top) {
-                    Capsule()
-                        .fill(HUDPalette.track)
-                        .frame(width: 28, height: 1)
-                        .allowsHitTesting(false)
-                        .accessibilityHidden(true)
-                }
+            RailGear(divider: .top, onOpenMenu: onOpenMenu)
 
             Color.clear.frame(height: Self.tail)
         }
         .frame(width: Self.width, height: Self.height(for: model.visibleProviders))
         .background {
-            HUDGlassSurface(contour: EdgeRailContour())
+            HUDGlassSurface(contour: EdgeRailContour(edge: edge))
         }
         .overlay(alignment: .top) {
             if model.isDemo {
@@ -109,26 +91,78 @@ struct UsageRail: View {
                     .padding(.vertical, 3)
                     .background(.white.opacity(0.09), in: Capsule())
                     .padding(.top, 27)
-                    .offset(x: 4)
+                    .offset(x: edge == .leading ? -4 : 4)
                     .accessibilityLabel("Demo mode")
             }
         }
         // The glass slides in from the edge. Reduce Motion keeps it in place and only fades.
-        .offset(x: presentation.isRevealed || reduceMotion ? 0 : Self.width)
+        .offset(x: presentation.isRevealed || reduceMotion ? 0 : edge == .leading ? -Self.width : Self.width)
         .opacity(presentation.isRevealed ? 1 : 0)
     }
 }
 
-/// Each tile follows the glass in, slightly later than the one above it.
-private struct Entrance: ViewModifier {
+/// The gear that opens the UsageApp menu when the pointer rests on it.
+struct RailGear: View {
+    static let size: CGFloat = 44
+
+    /// The side facing the rings, which gets a hairline.
+    let divider: Edge
+    let onOpenMenu: (NSView) -> Void
+    @State private var hovered = false
+
+    var body: some View {
+        Image(systemName: "gearshape")
+            .font(.system(size: 16, weight: .medium))
+            .foregroundStyle(HUDPalette.text)
+            .frame(width: Self.size, height: Self.size)
+            .background {
+                Circle()
+                    .fill(HUDPalette.track.opacity(hovered ? 1 : 0))
+                    .frame(width: 32, height: 32)
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
+            }
+            .background {
+                RailMenuHover(onHover: { hovered = $0 }, onOpen: onOpenMenu)
+            }
+            .accessibilityHidden(true)
+            .overlay(alignment: divider == .top ? .top : .leading) {
+                Capsule()
+                    .fill(HUDPalette.track)
+                    .frame(width: divider == .top ? 28 : 1, height: divider == .top ? 1 : 28)
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
+            }
+    }
+}
+
+/// Each tile follows the panel in from its edge, slightly later than the one before it.
+struct Entrance: ViewModifier {
     let revealed: Bool
     let delay: Double
+    let from: Edge
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private var travel: CGSize {
+        switch from {
+        case .leading: CGSize(width: -22, height: 0)
+        case .top: CGSize(width: 0, height: -14)
+        default: CGSize(width: 22, height: 0)
+        }
+    }
+
+    private var anchor: UnitPoint {
+        switch from {
+        case .leading: .leading
+        case .top: .top
+        default: .trailing
+        }
+    }
 
     func body(content: Content) -> some View {
         content
-            .offset(x: revealed || reduceMotion ? 0 : 22)
-            .scaleEffect(revealed || reduceMotion ? 1 : 0.82, anchor: .trailing)
+            .offset(revealed || reduceMotion ? .zero : travel)
+            .scaleEffect(revealed || reduceMotion ? 1 : 0.82, anchor: anchor)
             .opacity(revealed ? 1 : 0)
             .animation(
                 revealed
@@ -139,11 +173,21 @@ private struct Entrance: ViewModifier {
     }
 }
 
+extension UsageModel {
+    /// The visible provider with the highest headline reading.
+    var busiest: (provider: Provider, percent: Double)? {
+        visibleProviders
+            .compactMap { provider in display(for: provider).headline?.percent.map { (provider: provider, percent: $0) } }
+            .max { $0.percent < $1.percent }
+    }
+}
+
 /// A slim tab at the display edge that marks where the hidden panel is.
 struct EdgeTab: View {
     nonisolated static let size = CGSize(width: 12, height: 64)
 
     let model: UsageModel
+    let edge: Edge
 
     var body: some View {
         Capsule()
@@ -151,19 +195,16 @@ struct EdgeTab: View {
             .frame(width: 4, height: 44)
             .shadow(color: tint.opacity(0.55), radius: 4)
             .overlay(Capsule().strokeBorder(.black.opacity(0.25), lineWidth: 0.5))
-            .padding(.trailing, 2)
-            .frame(width: Self.size.width, height: Self.size.height, alignment: .trailing)
+            .padding(Edge.Set(edge), 2)
+            .frame(width: Self.size.width, height: Self.size.height, alignment: edge == .leading ? .leading : .trailing)
             .animation(.easeInOut(duration: 0.3), value: tint)
             .accessibilityHidden(true)
     }
 
     /// Neutral, or the busiest provider's color once it passes the notification threshold.
     private var tint: Color {
-        let busiest = model.visibleProviders
-            .compactMap { provider in model.display(for: provider).headline?.percent.map { (provider, $0) } }
-            .max { $0.1 < $1.1 }
-        guard let busiest, busiest.1 >= model.alertThreshold else { return .white.opacity(0.8) }
-        return busiest.0.hudTint
+        guard let busiest = model.busiest, busiest.percent >= model.alertThreshold else { return .white.opacity(0.8) }
+        return busiest.provider.hudTint
     }
 }
 
@@ -182,7 +223,16 @@ private struct RailMenuHover: NSViewRepresentable {
 }
 
 private struct EdgeRailContour: Shape {
+    let edge: Edge
+
     func path(in rect: CGRect) -> Path {
+        // Drawn against the right edge, then mirrored for the left.
+        let contour = rightEdgePath(in: rect)
+        guard edge == .leading else { return contour }
+        return contour.applying(CGAffineTransform(a: -1, b: 0, c: 0, d: 1, tx: rect.minX + rect.maxX, ty: 0))
+    }
+
+    private func rightEdgePath(in rect: CGRect) -> Path {
         let right = rect.maxX
         let left = rect.minX
         let top = rect.minY
@@ -218,14 +268,24 @@ private struct EdgeRailContour: Shape {
     }
 }
 
-private struct RingTile: View {
+struct RingTile: View {
     let reading: ProviderDisplay
     let hovered: Bool
     let pinned: Bool
     let showingDetails: Bool
     let revealed: Bool
     let entranceDelay: Double
+    /// The side that carries the pinned marker, toward the display edge.
+    let pinEdge: Edge
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private var pinAlignment: Alignment {
+        switch pinEdge {
+        case .leading: .leading
+        case .top, .bottom: .bottom
+        case .trailing: .trailing
+        }
+    }
 
     var body: some View {
         VStack(spacing: 2) {
@@ -249,12 +309,12 @@ private struct RingTile: View {
             }
         }
         .frame(width: 68, height: UsageRail.tileHeight, alignment: .top)
-        .background(alignment: .trailing) {
+        .background(alignment: pinAlignment) {
             if pinned {
                 Capsule()
                     .fill(reading.provider.hudTint)
-                    .frame(width: 2, height: 18)
-                    .padding(.trailing, 1)
+                    .frame(width: pinAlignment == .bottom ? 18 : 2, height: pinAlignment == .bottom ? 2 : 18)
+                    .padding(pinAlignment == .bottom ? .bottom : Edge.Set(pinEdge), 1)
             }
         }
         .animation(reduceMotion ? nil : .easeOut(duration: 0.14), value: pinned)

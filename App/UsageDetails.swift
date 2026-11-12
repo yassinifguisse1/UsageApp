@@ -206,18 +206,21 @@ struct UsageCallout: View {
     let details: UsageDetails
     let width: CGFloat
     let height: CGFloat
-    let tipY: CGFloat
+    /// The side the tip points out of, toward the panel.
+    let tipEdge: Edge
+    /// The tip's distance from the top for a side tip, or from the left for a top tip.
+    let tipOffset: CGFloat
     let onHover: (Bool) -> Void
 
     var body: some View {
-        let contour = CalloutContour(tipY: tipY)
+        let contour = CalloutContour(tipEdge: tipEdge, tipOffset: tipOffset)
         ScrollView {
             details
                 .padding(17)
         }
         .scrollBounceBehavior(.basedOnSize)
         .frame(width: width, height: height)
-        .padding(.trailing, Self.tipWidth)
+        .padding(Edge.Set(tipEdge), Self.tipWidth)
         .foregroundStyle(HUDPalette.text)
         .environment(\.colorScheme, .dark)
         .background {
@@ -231,15 +234,30 @@ struct UsageCallout: View {
 }
 
 private struct CalloutContour: Shape {
-    let tipY: CGFloat
+    let tipEdge: Edge
+    let tipOffset: CGFloat
 
     func path(in rect: CGRect) -> Path {
-        let top = rect.minY
-        let bottom = rect.maxY
-        let left = rect.minX
-        let right = rect.maxX - UsageCallout.tipWidth
+        // The path is drawn with its tip on the right, then turned to face the panel.
+        switch tipEdge {
+        case .leading:
+            trailingTip(in: CGSize(width: rect.width, height: rect.height))
+                .applying(CGAffineTransform(a: -1, b: 0, c: 0, d: 1, tx: rect.maxX, ty: rect.minY))
+        case .top:
+            trailingTip(in: CGSize(width: rect.height, height: rect.width))
+                .applying(CGAffineTransform(a: 0, b: -1, c: 1, d: 0, tx: rect.minX, ty: rect.maxY))
+        default:
+            trailingTip(in: rect.size).offsetBy(dx: rect.minX, dy: rect.minY)
+        }
+    }
+
+    private func trailingTip(in size: CGSize) -> Path {
+        let top: CGFloat = 0
+        let bottom = size.height
+        let left: CGFloat = 0
+        let right = size.width - UsageCallout.tipWidth
         let radius: CGFloat = 20
-        let tip = min(max(rect.minY + tipY, top + 32), bottom - 32)
+        let tip = min(max(tipOffset, top + 32), bottom - 32)
 
         return Path { path in
             path.move(to: CGPoint(x: left + radius, y: top))
@@ -247,13 +265,13 @@ private struct CalloutContour: Shape {
             path.addQuadCurve(to: CGPoint(x: right, y: top + radius), control: CGPoint(x: right, y: top))
             path.addLine(to: CGPoint(x: right, y: tip - 14))
             path.addCurve(
-                to: CGPoint(x: rect.maxX, y: tip),
+                to: CGPoint(x: size.width, y: tip),
                 control1: CGPoint(x: right, y: tip - 6),
-                control2: CGPoint(x: rect.maxX - 6, y: tip - 3)
+                control2: CGPoint(x: size.width - 6, y: tip - 3)
             )
             path.addCurve(
                 to: CGPoint(x: right, y: tip + 14),
-                control1: CGPoint(x: rect.maxX - 6, y: tip + 3),
+                control1: CGPoint(x: size.width - 6, y: tip + 3),
                 control2: CGPoint(x: right, y: tip + 6)
             )
             path.addLine(to: CGPoint(x: right, y: bottom - radius))

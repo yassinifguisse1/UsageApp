@@ -4,6 +4,10 @@ All notable changes to UsageApp are recorded here. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Added
+
+- **Position** setting for the panel: the right edge, the left edge, or the notch. At the notch, the panel shows the busiest reading beside the camera housing and drops down as a bar when you point at it. Displays without a notch get a pill in the middle of the menu bar.
+
 ### Changed
 
 - Hover over the floating panel gear to open the UsageApp menu. It closes when the pointer leaves the gear and menu.
