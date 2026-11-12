@@ -2,6 +2,14 @@
 
 UsageApp puts Claude Code, Codex, and Perplexity allowance rings at the right edge of your Mac display. The Claude Code and Codex rings show the main short window when available. Perplexity shows a manually recorded Computer plan credit balance. Hover over a ring to preview its details, or click the ring to toggle the card. Use the pin button in the card to keep it open. Click the filled pin or the same ring to dismiss a pinned card. The gear at the bottom of the panel opens the same menu as the menu bar icon, including **Settings & Usage**, display selection, show/hide, and refresh.
 
+## Install
+
+```sh
+brew install --cask yassinifguisse1/tap/usageapp
+```
+
+Or download `UsageApp-macos-universal.zip` from [GitHub Releases](https://github.com/yassinifguisse1/UsageApp/releases), check it with `shasum -a 256 -c UsageApp-macos-universal.zip.sha256`, unzip it, and move **UsageApp** to Applications. UsageApp runs on Apple silicon and Intel Macs with macOS 14 or later. Releases from 1.1.0 onward are signed with a Developer ID and notarized by Apple. Version 1.0.0 is ad hoc signed, so macOS blocks it until you allow it in **System Settings → Privacy & Security**.
+
 ## Build and try the demo
 
 Use macOS 14 or later and Xcode 16 or later. Open **UsageApp.xcodeproj**, select the **UsageApp** scheme with **My Mac** as the destination, and press **Run**. The app appears in the menu bar and opens a panel marked **Demo** on the primary display. Demo readings work without either CLI or a sign-in. The rail and cards use Liquid Glass on macOS 26 or later when built with Xcode 26 or later, with a frosted material on older versions and an opaque background when Reduce Transparency is on. Choose **Switch to Live Usage** from the UsageApp menu when ready to connect. On your first switch, **Settings & Usage** opens if a provider needs attention. You can start with any provider and come back for the others.
@@ -17,11 +25,9 @@ The shared scheme builds the app, its bundled status-line helper, and the test s
 
 ## CI and releases
 
-GitHub Actions runs the Swift package tests, tests the Xcode project, and packages a universal app on pull requests and pushes to `main`. Get the app ZIP and its SHA-256 checksum from [GitHub Releases](https://github.com/yassinifguisse1/UsageApp/releases) or download the `UsageApp-macos-universal` artifact from a successful [workflow run](https://github.com/yassinifguisse1/UsageApp/actions/workflows/macos.yml).
+GitHub Actions runs the Swift package tests, tests the Xcode project, and packages a universal app on pull requests and pushes to `main`. Pull requests build ad hoc. Pushes to `main` and release tags are signed with a Developer ID and notarized by Apple when the signing secrets are configured. A release tag fails rather than publish an unsigned build. Each successful run uploads the `UsageApp-macos-universal` artifact to its [workflow run](https://github.com/yassinifguisse1/UsageApp/actions/workflows/macos.yml).
 
-With both files in the same directory, run `shasum -a 256 -c UsageApp-macos-universal.zip.sha256`. Unzip the app and move it to Applications. The build supports Apple silicon and Intel Macs running macOS 14 or later. The app is ad hoc signed and has no Apple notarization, so macOS may block it on first launch.
-
-To publish a release, push a `vMAJOR.MINOR.PATCH` tag from `main` that matches the app's `MARKETING_VERSION` in Xcode. The workflow repeats the checks and publishes the ZIP and checksum to GitHub Releases after they pass.
+To publish a release, update `CHANGELOG.md`, then push a `vMAJOR.MINOR.PATCH` tag from `main` that matches the app's `MARKETING_VERSION` in Xcode. The workflow repeats the checks, publishes the notarized ZIP and checksum to GitHub Releases, and updates the cask in [yassinifguisse1/homebrew-tap](https://github.com/yassinifguisse1/homebrew-tap). [CONTRIBUTING.md](CONTRIBUTING.md#releases) lists the repository secrets the release needs.
 
 ## Connect Codex
 
