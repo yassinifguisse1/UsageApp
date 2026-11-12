@@ -14,6 +14,7 @@ First public release.
 - Codex readings through the CLI's documented app-server interface.
 - Claude Code readings through a status-line helper, with guided setup that shows the proposed `settings.json` change before applying it, preserves an existing status line, and can be undone.
 - Manual Perplexity Computer credit tracking (beta).
+- The panel hides at the display edge behind a slim tab and slides out with an animation when you point at the edge. It can also stay out all the time.
 - **Open UsageApp at login** option.
 - Notifications when a Claude Code or Codex window passes 75, 90, or 95 % and at 100 %, plus an optional notification when a window resets.
 - A sparkline of the headline window for the current period in each card.

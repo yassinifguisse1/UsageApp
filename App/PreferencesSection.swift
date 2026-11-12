@@ -56,6 +56,13 @@ struct PreferencesSection: View {
 
             Divider()
 
+            Picker("Show the panel", selection: Binding(get: { model.revealsPanelOnHover }, set: model.setRevealsPanelOnHover)) {
+                Text("When pointing at the edge").tag(true)
+                Text("Always").tag(false)
+            }
+            .fixedSize()
+            note("When pointing at the edge, a slim tab marks the panel. Move the pointer to the edge beside it to slide the panel out.")
+
             Text("Show in panel")
             HStack(spacing: 16) {
                 ForEach(Provider.allCases, id: \.self) { provider in

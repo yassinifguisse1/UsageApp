@@ -19,7 +19,7 @@ final class AppCoordinator: NSObject, NSApplicationDelegate, NSMenuDelegate {
             self.openSetup()
         }
         model.onAlerts = { [weak self] in self?.notifier.post($0) }
-        model.onVisibleProvidersChanged = { [weak self] in self?.overlay?.updatePlacement() }
+        model.onPanelSettingsChanged = { [weak self] in self?.overlay?.updatePlacement() }
         installMenu()
         NotificationCenter.default.addObserver(
             self, selector: #selector(screenChanged),

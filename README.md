@@ -14,7 +14,7 @@
 </picture>
 -->
 
-UsageApp puts Claude Code, Codex, and Perplexity allowance rings at the right edge of your Mac display. The Claude Code and Codex rings show the main short window when available. Perplexity shows a manually recorded Computer plan credit balance. Hover over a ring to preview its details, or click the ring to toggle the card. Use the pin button in the card to keep it open. Click the filled pin or the same ring to dismiss a pinned card. The gear at the bottom of the panel opens the same menu as the menu bar icon, including **Settings & Usage**, display selection, show/hide, and refresh.
+UsageApp puts Claude Code, Codex, and Perplexity allowance rings at the right edge of your Mac display. The Claude Code and Codex rings show the main short window when available. Perplexity shows a manually recorded Computer plan credit balance. The panel stays tucked away until you need it: a slim tab marks its place, and moving the pointer to the display edge beside the tab slides the panel out. The tab takes the busiest provider's color once usage passes your notification threshold. Hover over a ring to preview its details, or click the ring to toggle the card. Use the pin button in the card to keep it open. Click the filled pin or the same ring to dismiss a pinned card. The gear at the bottom of the panel opens the same menu as the menu bar icon, including **Settings & Usage**, display selection, show/hide, and refresh.
 
 ## Install
 
@@ -111,6 +111,7 @@ Open **Settings & Usage → Perplexity → Open Perplexity Usage**. Enter the re
 
 - **Open UsageApp at login** registers the app as a login item. Move UsageApp to Applications first.
 - **Notify me at** posts a notification once per window period when a Claude Code or Codex window passes the chosen percentage (75, 90, or 95 %) and again at 100 %. **Notify when a window resets** posts when that window starts a new period. While notifications are on, UsageApp keeps checking with the panel hidden: Codex every 10 minutes and the local Claude snapshot every minute.
+- **Show the panel** chooses between sliding out when you point at the edge (the default) and staying out all the time. The panel always stays out while VoiceOver is running.
 - **Show in panel** hides providers you don't use from the rail. **Check Codex every** sets the refresh interval while the panel is visible.
 - **Check for updates daily** adds an **Update Available** item to the menu when a newer release is published.
 

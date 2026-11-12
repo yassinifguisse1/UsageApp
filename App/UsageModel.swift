@@ -20,6 +20,7 @@ final class UsageModel {
     private(set) var hiddenProviders: Set<Provider>
     private(set) var codexRefreshMinutes: Int
     private(set) var checksForUpdates: Bool
+    private(set) var revealsPanelOnHover: Bool
     var availableUpdate: AvailableRelease?
 
     let claudeInstaller: ClaudeSetupInstaller
@@ -27,7 +28,7 @@ final class UsageModel {
     @ObservationIgnored private let readClaude: @Sendable (ClaudeSetupConnection, Date?) async -> ProviderReading
     @ObservationIgnored var onFirstLiveSetup: (() -> Void)?
     @ObservationIgnored var onAlerts: (([UsageAlert]) -> Void)?
-    @ObservationIgnored var onVisibleProvidersChanged: (() -> Void)?
+    @ObservationIgnored var onPanelSettingsChanged: (() -> Void)?
     @ObservationIgnored private let trendStore: UsageTrendStore?
     @ObservationIgnored private var alertTracker: UsageAlertTracker
     @ObservationIgnored private var isVisible = true
@@ -70,6 +71,7 @@ final class UsageModel {
         hiddenProviders = hidden.count < Provider.allCases.count ? hidden : []
         codexRefreshMinutes = defaults.object(forKey: "codexRefreshMinutes") as? Int ?? 2
         checksForUpdates = defaults.object(forKey: "checksForUpdates") as? Bool ?? true
+        revealsPanelOnHover = defaults.object(forKey: "revealsPanelOnHover") as? Bool ?? true
         self.claudeInstaller = claudeInstaller
         self.readCodex = readCodex
         self.readClaude = readClaude
@@ -119,7 +121,13 @@ final class UsageModel {
         guard next != hiddenProviders, next.count < Provider.allCases.count else { return }
         hiddenProviders = next
         defaults.set(next.map(\.rawValue).sorted(), forKey: "hiddenProviders")
-        onVisibleProvidersChanged?()
+        onPanelSettingsChanged?()
+    }
+
+    func setRevealsPanelOnHover(_ enabled: Bool) {
+        revealsPanelOnHover = enabled
+        defaults.set(enabled, forKey: "revealsPanelOnHover")
+        onPanelSettingsChanged?()
     }
 
     func setCodexRefreshMinutes(_ minutes: Int) {

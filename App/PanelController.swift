@@ -9,6 +9,12 @@ final class PanelController {
     private let defaults: UserDefaults
     private let rail = OverlayPanel()
     private let card = OverlayPanel()
+    private let edgeTab = OverlayPanel()
+    private let presentation = RailPresentation()
+    private var pointerMonitors: [Any] = []
+    private var revealing: Task<Void, Never>?
+    private var concealing: Task<Void, Never>?
+    private var menuOpen = false
     private var preferredDisplay: String?
     private var hovered: Provider?
     private var pointerInCard = false
@@ -33,14 +39,31 @@ final class PanelController {
         card.title = "Usage Details"
         rail.contentView = OverlayHostingView(rootView: UsageRail(
             model: model,
+            presentation: presentation,
             onHover: { [weak self] provider, inside in self?.hover(provider, inside: inside) },
             onClick: { [weak self] provider in self?.toggleDetails(provider) },
             onOpenMenu: { [weak self] anchor in
-                if self?.model.pinnedProvider == nil { self?.closeCard() }
+                guard let self else { return }
+                if model.pinnedProvider == nil { closeCard() }
+                // The menu tracks synchronously. Keep the rail out until it closes.
+                menuOpen = true
                 onOpenMenu(anchor)
+                menuOpen = false
+                pointerMoved()
             }
         ))
+        edgeTab.title = "Usage Panel Tab"
+        edgeTab.hasShadow = false
+        edgeTab.ignoresMouseEvents = true
+        edgeTab.contentView = OverlayHostingView(rootView: EdgeTab(model: model))
+        presentation.isRevealed = !revealsOnHover
+        watchPointer()
         updatePlacement()
+    }
+
+    /// VoiceOver can't point at the edge, so the panel stays out while it runs.
+    private var revealsOnHover: Bool {
+        model.revealsPanelOnHover && !NSWorkspace.shared.isVoiceOverEnabled
     }
 
     var selectedDisplayID: String? { preferredDisplay }
@@ -63,6 +86,7 @@ final class PanelController {
     func updatePlacement() {
         guard isShown, let screen = targetDisplay else {
             rail.orderOut(nil)
+            edgeTab.orderOut(nil)
             hovered = nil
             closeCard()
             return
@@ -78,8 +102,133 @@ final class PanelController {
             width: UsageRail.width, height: height
         )
         rail.setFrame(frame, display: true)
-        rail.orderFrontRegardless()
+        let tab = EdgeTab.size
+        edgeTab.setFrame(
+            NSRect(x: area.maxX - tab.width, y: (area.midY - tab.height / 2).rounded(), width: tab.width, height: tab.height),
+            display: true
+        )
+
+        if revealsOnHover {
+            if presentation.isRevealed {
+                rail.orderFrontRegardless()
+                edgeTab.orderOut(nil)
+            } else {
+                rail.orderOut(nil)
+                edgeTab.alphaValue = 1
+                edgeTab.orderFrontRegardless()
+            }
+            pointerMoved()
+        } else {
+            revealing?.cancel()
+            concealing?.cancel()
+            revealing = nil
+            concealing = nil
+            presentation.isRevealed = true
+            edgeTab.orderOut(nil)
+            rail.orderFrontRegardless()
+        }
         updateCard()
+    }
+
+    // MARK: Reveal on hover
+
+    private func watchPointer() {
+        let events: NSEvent.EventTypeMask = [.mouseMoved, .leftMouseDragged, .rightMouseDragged]
+        // Pointer movement needs no special permission. Only keyboard monitoring does.
+        if let global = NSEvent.addGlobalMonitorForEvents(matching: events, handler: { [weak self] _ in
+            MainActor.assumeIsolated { self?.pointerMoved() }
+        }) { pointerMonitors.append(global) }
+        if let local = NSEvent.addLocalMonitorForEvents(matching: events, handler: { [weak self] event in
+            MainActor.assumeIsolated { self?.pointerMoved() }
+            return event
+        }) { pointerMonitors.append(local) }
+    }
+
+    private func pointerMoved() {
+        guard isShown, revealsOnHover, !menuOpen else { return }
+        let pointer = NSEvent.mouseLocation
+        if presentation.isRevealed {
+            if keepsRailOut(pointer) {
+                concealing?.cancel()
+                concealing = nil
+            } else if concealing == nil {
+                concealing = Task { [weak self] in
+                    try? await Task.sleep(for: .milliseconds(420))
+                    guard !Task.isCancelled else { return }
+                    self?.conceal()
+                }
+            }
+        } else if isAtEdge(pointer) {
+            guard revealing == nil else { return }
+            // A short dwell, so passing through to another display doesn't open the panel.
+            revealing = Task { [weak self] in
+                try? await Task.sleep(for: .milliseconds(90))
+                guard !Task.isCancelled, let self else { return }
+                revealing = nil
+                if isAtEdge(NSEvent.mouseLocation) { reveal() }
+            }
+        } else {
+            revealing?.cancel()
+            revealing = nil
+        }
+    }
+
+    private func isAtEdge(_ pointer: NSPoint) -> Bool {
+        guard let area = targetDisplay?.visibleFrame else { return false }
+        let band = rail.frame.insetBy(dx: 0, dy: -12)
+        return pointer.x >= area.maxX - 4 && pointer.x <= area.maxX + 1
+            && pointer.y >= band.minY && pointer.y <= band.maxY
+    }
+
+    private func keepsRailOut(_ pointer: NSPoint) -> Bool {
+        model.pinnedProvider != nil || menuOpen
+            || rail.frame.insetBy(dx: -14, dy: -18).contains(pointer)
+            || card.isVisible && card.frame.insetBy(dx: -14, dy: -14).contains(pointer)
+    }
+
+    private func reveal() {
+        guard isShown, revealsOnHover, !presentation.isRevealed else { return }
+        concealing?.cancel()
+        concealing = nil
+        rail.orderFrontRegardless()
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.12
+            edgeTab.animator().alphaValue = 0
+        } completionHandler: { [weak self] in
+            MainActor.assumeIsolated {
+                guard let self, self.presentation.isRevealed else { return }
+                self.edgeTab.orderOut(nil)
+            }
+        }
+        let reduceMotion = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+        withAnimation(reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.4, dampingFraction: 0.82)) {
+            presentation.isRevealed = true
+        }
+        Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(450))
+            self?.rail.invalidateShadow()
+        }
+    }
+
+    private func conceal() {
+        concealing = nil
+        guard revealsOnHover, presentation.isRevealed, !keepsRailOut(NSEvent.mouseLocation) else { return }
+        hovered = nil
+        closeCard()
+        withAnimation(.easeIn(duration: 0.2)) {
+            presentation.isRevealed = false
+        }
+        Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(230))
+            guard let self, !presentation.isRevealed, isShown else { return }
+            rail.orderOut(nil)
+            edgeTab.alphaValue = 0
+            edgeTab.orderFrontRegardless()
+            NSAnimationContext.runAnimationGroup({ context in
+                context.duration = 0.25
+                self.edgeTab.animator().alphaValue = 1
+            }, completionHandler: nil)
+        }
     }
 
     func updateCard() {
