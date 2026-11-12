@@ -14,7 +14,7 @@
 </picture>
 -->
 
-UsageApp puts Claude Code, Codex, and Perplexity allowance rings at the right edge of your Mac display. The Claude Code and Codex rings show the main short window when available. Perplexity shows a manually recorded Computer plan credit balance. The panel stays tucked away until you need it: a slim tab marks its place, and moving the pointer to the display edge beside the tab slides the panel out. The tab takes the busiest provider's color once usage passes your notification threshold. Hover over a ring to preview its details, or click the ring to toggle the card. Use the pin button in the card to keep it open. Click the filled pin or the same ring to dismiss a pinned card. The gear at the bottom of the panel opens the same menu as the menu bar icon, including a usage summary, **Settings**, display selection, show/hide, and refresh.
+UsageApp puts Claude Code, Codex, and Perplexity allowance rings at the right edge of your Mac display. The Claude Code and Codex rings show the main short window when available. Perplexity shows a manually recorded Computer plan credit balance. The panel stays tucked away until you need it: a slim tab marks its place, and moving the pointer to the display edge beside the tab slides the panel out. The tab takes the busiest provider's color once usage passes your notification threshold. Hover over a ring to preview its details, or click the ring to toggle the card. Use the pin button in the card to keep it open. Click the filled pin or the same ring to dismiss a pinned card. Hover over the gear at the bottom of the panel to open the same menu as the menu bar icon, including a usage summary, **Settings**, display selection, show/hide, and refresh.
 
 ## Install
 

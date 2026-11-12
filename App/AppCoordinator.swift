@@ -16,6 +16,14 @@ final class AppCoordinator: NSObject, NSApplicationDelegate, NSMenuDelegate {
     )
     private var settingsOpened = false
     private var timer: Timer?
+    private var panelMenuExitTime: ContinuousClock.Instant?
+
+    private struct PanelMenuHover {
+        let menu: NSMenu
+        let window: NSWindow
+        let gearFrame: NSRect
+        let fallbackFrame: NSRect
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         overlay = PanelController(model: model) { [weak self] in self?.openPanelMenu(from: $0) }
@@ -73,12 +81,60 @@ final class AppCoordinator: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func openPanelMenu(from anchor: NSView) {
         guard let window = anchor.window else { return }
         let menu = makeUsageMenu()
-        let center = window.convertPoint(toScreen: anchor.convert(
-            NSPoint(x: anchor.bounds.midX, y: anchor.bounds.midY), to: nil
-        ))
+        let gearFrame = window.convertToScreen(anchor.convert(anchor.bounds, to: nil))
+        let size = menu.size
         let rightEdge = window.frame.minX - 6
-        let x = NSApp.userInterfaceLayoutDirection == .rightToLeft ? rightEdge : rightEdge - menu.size.width
-        menu.popUp(positioning: nil, at: NSPoint(x: x, y: center.y + menu.size.height / 2), in: nil)
+        let menuFrame = NSRect(
+            x: rightEdge - size.width, y: gearFrame.midY - size.height / 2,
+            width: size.width, height: size.height
+        )
+        let x = NSApp.userInterfaceLayoutDirection == .rightToLeft ? menuFrame.maxX : menuFrame.minX
+        let hover = PanelMenuHover(menu: menu, window: window, gearFrame: gearFrame, fallbackFrame: menuFrame)
+        let hoverTimer = Timer(
+            timeInterval: 0.05, target: self, selector: #selector(updatePanelMenuHover(_:)),
+            userInfo: hover, repeats: true
+        )
+        RunLoop.main.add(hoverTimer, forMode: .eventTracking)
+        defer {
+            hoverTimer.invalidate()
+            panelMenuExitTime = nil
+        }
+        menu.popUp(positioning: nil, at: NSPoint(x: x, y: menuFrame.maxY), in: nil)
+    }
+
+    @objc private func updatePanelMenuHover(_ timer: Timer) {
+        guard let hover = timer.userInfo as? PanelMenuHover else { return }
+        let menu = hover.menu
+        guard hover.window.isVisible else {
+            timer.invalidate()
+            menu.cancelTracking()
+            return
+        }
+        let pointer = NSEvent.mouseLocation
+        let visibleFrame = menu.accessibilityFrame()
+        let menuFrame = visibleFrame.isEmpty ? hover.fallbackFrame : visibleFrame
+        let gearFrame = hover.gearFrame
+        let crossingGap = pointer.x >= menuFrame.maxX && pointer.x <= gearFrame.minX
+            && pointer.y >= gearFrame.minY && pointer.y <= gearFrame.maxY
+        if gearFrame.contains(pointer) || crossingGap || menuFrame.contains(pointer)
+            || containsPointerInSubmenu(pointer, of: menu) {
+            panelMenuExitTime = nil
+        } else if let panelMenuExitTime {
+            if panelMenuExitTime.duration(to: .now) >= .milliseconds(250) {
+                timer.invalidate()
+                menu.cancelTracking()
+            }
+        } else {
+            panelMenuExitTime = .now
+        }
+    }
+
+    private func containsPointerInSubmenu(_ pointer: NSPoint, of menu: NSMenu) -> Bool {
+        menu.items.contains { item in
+            guard let submenu = item.submenu else { return false }
+            let frame = submenu.accessibilityFrame()
+            return !frame.isEmpty && (frame.contains(pointer) || containsPointerInSubmenu(pointer, of: submenu))
+        }
     }
 
     func menuNeedsUpdate(_ menu: NSMenu) {
