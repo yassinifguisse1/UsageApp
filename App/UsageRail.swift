@@ -166,35 +166,47 @@ struct EdgeTab: View {
     }
 }
 
-private struct RailMenuButton: NSViewRepresentable {
+/// The gear is a SwiftUI button so the whole highlighted slot takes the click. A borderless
+/// image-only NSButton only tracks clicks on its icon.
+private struct RailMenuButton: View {
     let onOpen: (NSView) -> Void
+    @State private var anchor = MenuAnchor()
 
-    func makeNSView(context: Context) -> MenuControl {
-        let button = MenuControl()
-        button.isBordered = false
-        button.imagePosition = .imageOnly
-        button.image = NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil)?
-            .withSymbolConfiguration(.init(pointSize: 16, weight: .medium))
-        button.contentTintColor = NSColor(HUDPalette.text)
-        button.toolTip = "Show UsageApp Menu"
-        button.setAccessibilityLabel("UsageApp Menu")
-        button.target = button
-        button.action = #selector(MenuControl.openMenu)
-        return button
-    }
-
-    func updateNSView(_ button: MenuControl, context: Context) {
-        button.onOpen = onOpen
-    }
-
-    final class MenuControl: NSButton {
-        var onOpen: ((NSView) -> Void)?
-
-        override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
-
-        @objc func openMenu() {
-            onOpen?(self)
+    var body: some View {
+        Button(action: open) {
+            Label("UsageApp Menu", systemImage: "gearshape")
+                .labelStyle(.iconOnly)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundStyle(HUDPalette.text)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .contentShape(.rect)
         }
+        .buttonStyle(.plain)
+        .help("Show UsageApp Menu")
+        .background { MenuAnchorView(anchor: anchor) }
+    }
+
+    private func open() {
+        if let view = anchor.view { onOpen(view) }
+    }
+}
+
+/// Holds the AppKit view the menu is positioned against.
+private final class MenuAnchor {
+    weak var view: NSView?
+}
+
+private struct MenuAnchorView: NSViewRepresentable {
+    let anchor: MenuAnchor
+
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        anchor.view = view
+        return view
+    }
+
+    func updateNSView(_ view: NSView, context: Context) {
+        anchor.view = view
     }
 }
 
