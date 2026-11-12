@@ -70,7 +70,7 @@ struct UsageDetails: View {
                     .accessibilityHidden(true)
                 HStack(alignment: .firstTextBaseline, spacing: 5) {
                     Image(systemName: "clock")
-                        .font(.system(size: 9))
+                        .font(.system(size: 10))
                         .accessibilityHidden(true)
                     Text(reading.provider == .perplexity && !isDemo
                          ? "Recorded \(UsageFormat.date(date))" : "Captured \(UsageFormat.date(date))")
@@ -165,7 +165,7 @@ private struct UsageSparkline: View {
             .chartYAxis(.hidden)
             .frame(height: 30)
             Text("Since \(UsageFormat.date(points[0].date))")
-                .font(.system(size: 9))
+                .font(.system(size: 10))
                 .foregroundStyle(secondary)
         }
         .accessibilityElement()

@@ -27,8 +27,8 @@ struct ClaudeSetupReview: View {
                 Text(preview.installedCommand).textSelection(.enabled)
             }
             Text(preview.originalCommand == nil
-                 ? "The helper receives usage from Claude Code. You can undo setup from Usage & Setup."
-                 : "Your existing script will still receive Claude Code’s input and provide the status-line output. You can undo setup from Usage & Setup.")
+                 ? "The helper receives usage from Claude Code. You can undo setup in Settings."
+                 : "Your existing script will still receive Claude Code’s input and provide the status-line output. You can undo setup in Settings.")
                 .foregroundStyle(.secondary)
             Text("If your session uses a custom settings path or an override, use Manual Setup for that session.")
                 .font(.caption)

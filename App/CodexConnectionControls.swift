@@ -62,7 +62,7 @@ struct CodexConnectionControls: View {
     private func copyLoginCommand() {
         let command: String
         if let path = model.codexPath {
-            command = "'" + path.replacingOccurrences(of: "'", with: "'\\''") + "' login"
+            command = "'" + path.replacing("'", with: "'\\''") + "' login"
         } else {
             command = "codex login"
         }

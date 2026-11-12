@@ -9,14 +9,20 @@ final class AppCoordinator: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private lazy var updates = UpdateChecker(model: model)
     private var overlay: PanelController?
     private var statusItem: NSStatusItem?
-    private var setupWindow: NSWindow?
+    private lazy var settings = SettingsWindowController(
+        model: model,
+        chooseExecutable: { [weak self] in self?.chooseExecutable() },
+        requestNotifications: { [notifier] in await notifier.requestAuthorization() }
+    )
+    private var settingsOpened = false
     private var timer: Timer?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         overlay = PanelController(model: model) { [weak self] in self?.openPanelMenu(from: $0) }
         model.onFirstLiveSetup = { [weak self] in
-            guard let self, self.setupWindow?.isVisible != true else { return }
-            self.openSetup()
+            guard let self, !(settingsOpened && settings.isVisible) else { return }
+            let needsSetup = Provider.allCases.first { self.model.display(for: $0).setupAction != nil }
+            self.openSettings(needsSetup.map(SettingsPane.init))
         }
         model.onAlerts = { [weak self] in self?.notifier.post($0) }
         model.onPanelSettingsChanged = { [weak self] in self?.overlay?.updatePlacement() }
@@ -83,6 +89,11 @@ final class AppCoordinator: NSObject, NSApplicationDelegate, NSMenuDelegate {
             menu.addItem(download)
             menu.addItem(.separator())
         }
+        menu.addItem(.sectionHeader(title: model.isDemo ? "Usage (Demo)" : "Usage"))
+        for provider in model.visibleProviders {
+            menu.addItem(usageItem(for: provider))
+        }
+        menu.addItem(.separator())
         menu.addItem(item(overlay?.isShown == true ? "Hide Panel" : "Show Panel", action: #selector(togglePanel)))
         menu.addItem(item("Refresh Now", action: #selector(refresh), key: "r"))
         menu.addItem(item(model.isDemo ? "Switch to Live Usage" : "Switch to Demo Mode", action: #selector(toggleMode)))
@@ -104,8 +115,21 @@ final class AppCoordinator: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(displayItem)
 
         menu.addItem(.separator())
-        menu.addItem(item("Settings & Usage…", action: #selector(openSetup), key: ","))
+        menu.addItem(item("Settings…", action: #selector(openSettingsFromMenu), key: ","))
         menu.addItem(item("Quit UsageApp", action: #selector(quit), key: "q"))
+    }
+
+    /// A glanceable reading for when the panel is tucked away. Choosing it opens that provider's settings.
+    private func usageItem(for provider: Provider) -> NSMenuItem {
+        let reading = model.display(for: provider)
+        let usage = item(provider.name, action: #selector(openProviderSettings(_:)))
+        usage.representedObject = provider.rawValue
+        usage.image = provider.logoImage(size: 16)
+        usage.badge = NSMenuItemBadge(string: reading.headline?.percent.map(UsageFormat.percent) ?? reading.state.shortLabel)
+        if #available(macOS 14.4, *), let headline = reading.headline {
+            usage.subtitle = headline.resetsAt.map { "\(headline.label) · resets \(UsageFormat.date($0))" } ?? headline.label
+        }
+        return usage
     }
 
     private func item(_ title: String, action: Selector, key: String = "") -> NSMenuItem {
@@ -115,7 +139,7 @@ final class AppCoordinator: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     private func tick() {
-        model.tick(visible: overlay?.visible == true || setupWindow?.isVisible == true)
+        model.tick(visible: overlay?.visible == true || settingsOpened && settings.isVisible)
         overlay?.updateCard()
         updates.checkIfDue()
     }
@@ -152,44 +176,30 @@ final class AppCoordinator: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if !model.isDemo { refresh() }
     }
 
-    @objc private func openSetup() {
-        let window = setupWindow ?? makeSetupWindow()
-        setupWindow = window
-        NSApp.activate()
-        if window.isMiniaturized { window.deminiaturize(nil) }
-        window.makeKeyAndOrderFront(nil)
+    @objc private func openSettingsFromMenu() {
+        openSettings()
+    }
+
+    @objc private func openProviderSettings(_ sender: NSMenuItem) {
+        guard let provider = (sender.representedObject as? String).flatMap(Provider.init(rawValue:)) else { return }
+        openSettings(SettingsPane(provider))
+    }
+
+    private func openSettings(_ pane: SettingsPane? = nil) {
+        settingsOpened = true
+        settings.show(pane)
         tick()
     }
 
-    private func makeSetupWindow() -> NSWindow {
-        let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 520, height: 690),
-            styleMask: [.titled, .closable, .resizable, .miniaturizable],
-            backing: .buffered,
-            defer: false
-        )
-        window.title = "Settings & Usage"
-        window.collectionBehavior = [.moveToActiveSpace]
-        window.contentMinSize = NSSize(width: 360, height: 300)
-        window.isReleasedWhenClosed = false
-        window.contentView = NSHostingView(rootView: SetupView(
-            model: model,
-            chooseExecutable: { [weak self] in self?.chooseExecutable() },
-            requestNotifications: { [notifier] in await notifier.requestAuthorization() }
-        ))
-        window.center()
-        return window
-    }
-
     private func chooseExecutable() {
-        guard let setupWindow else { return }
+        guard let window = settings.window else { return }
         let picker = NSOpenPanel()
         picker.message = "Select the Codex CLI executable."
         picker.prompt = "Choose Executable"
         picker.canChooseDirectories = false
         picker.resolvesAliases = true
         picker.showsHiddenFiles = true
-        picker.beginSheetModal(for: setupWindow) { [weak self] response in
+        picker.beginSheetModal(for: window) { [weak self] response in
             guard response == .OK, let url = picker.url else { return }
             self?.model.setCodexExecutable(url)
         }

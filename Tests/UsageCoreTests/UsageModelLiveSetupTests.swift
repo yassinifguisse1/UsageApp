@@ -123,7 +123,7 @@ import UsageCore
     defer { model.stop() }
     var alerts: [UsageAlert] = []
     model.onAlerts = { alerts += $0 }
-    model.setAlertsEnabled(true)
+    model.alertsEnabled = true
     model.refresh()
     #expect(await eventually { alerts.map(\.provider) == [.codex] })
     model.refresh()

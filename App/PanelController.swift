@@ -207,6 +207,8 @@ final class PanelController {
         Task { [weak self] in
             try? await Task.sleep(for: .milliseconds(450))
             self?.rail.invalidateShadow()
+            try? await Task.sleep(for: .milliseconds(700))
+            self?.presentation.sweepsArcs = false
         }
     }
 

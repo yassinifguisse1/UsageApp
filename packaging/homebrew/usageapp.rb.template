@@ -26,7 +26,7 @@ cask "usageapp" do
   ]
 
   caveats <<~EOS
-    If you connected Claude Code, choose Settings & Usage → Claude Code → Undo Setup
+    If you connected Claude Code, choose Settings → Claude Code → Undo Setup
     before running `brew uninstall --zap usageapp`, so your original status line is restored.
   EOS
 end

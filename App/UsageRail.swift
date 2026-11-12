@@ -6,6 +6,8 @@ import UsageCore
 @MainActor @Observable
 final class RailPresentation {
     var isRevealed = true
+    /// The arcs sweep in on the first reveal only. Pointing at the edge is frequent, so later reveals skip it.
+    var sweepsArcs = true
 }
 
 struct UsageRail: View {
@@ -32,7 +34,7 @@ struct UsageRail: View {
     @State private var menuHovered = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    static func entranceDelay(at index: Int) -> Double { 0.05 + Double(index) * 0.045 }
+    static func entranceDelay(at index: Int) -> Double { 0.04 + Double(index) * 0.03 }
 
     static func ringCenter(for provider: Provider, in providers: [Provider]) -> CGFloat {
         let index = providers.firstIndex(of: provider) ?? 0
@@ -52,7 +54,7 @@ struct UsageRail: View {
                         hovered: hovered == provider,
                         pinned: model.pinnedProvider == provider,
                         showingDetails: model.detailsProvider == provider,
-                        revealed: presentation.isRevealed,
+                        revealed: presentation.isRevealed || !presentation.sweepsArcs,
                         entranceDelay: Self.entranceDelay(at: index)
                     )
                 }
@@ -99,7 +101,7 @@ struct UsageRail: View {
         .overlay(alignment: .top) {
             if model.isDemo {
                 Text("DEMO")
-                    .font(.system(size: 9, weight: .semibold, design: .monospaced))
+                    .font(.system(size: 10, weight: .semibold, design: .monospaced))
                     .tracking(1)
                     .foregroundStyle(HUDPalette.secondary)
                     .padding(.horizontal, 7)
@@ -250,6 +252,8 @@ private struct RingTile: View {
             if let percent = reading.headline?.percent {
                 Text(UsageFormat.percent(percent))
                     .font(.system(size: 20, weight: .medium).monospacedDigit())
+                    .contentTransition(.numericText(value: percent))
+                    .animation(reduceMotion ? nil : .smooth, value: percent)
                     .foregroundStyle(HUDPalette.text)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
@@ -261,7 +265,7 @@ private struct RingTile: View {
                         .foregroundStyle(HUDPalette.secondary)
                 }
             } else {
-                Text(statusLabel)
+                Text(reading.state.shortLabel)
                     .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(HUDPalette.secondary)
                     .lineLimit(1)
@@ -282,15 +286,6 @@ private struct RingTile: View {
         .accessibilityLabel(reading.provider.name)
         .accessibilityValue(accessibilityValue)
         .accessibilityHint(showingDetails ? "Dismisses usage details" : "Shows usage details")
-    }
-
-    private var statusLabel: String {
-        switch reading.state {
-        case .setupRequired: "Set up"
-        case .waiting: "Waiting"
-        case .awaitingReset: "Reset due"
-        case .current, .unavailable, .stale: "No data"
-        }
     }
 
     private var accessibilityValue: String {
@@ -346,6 +341,7 @@ private struct UsageGauge: View {
                             : .easeIn(duration: 0.1),
                         value: drawn
                     )
+                    .animation(reduceMotion ? nil : .smooth, value: arc)
             }
             ProviderMark(provider: reading.provider, onDarkSurface: true, size: reading.provider == .perplexity ? 23 : 27)
         }

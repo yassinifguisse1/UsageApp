@@ -6,13 +6,29 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7F3FCC24D0AC4170B34B79F0 /* ProviderSettingsPane.swift in UsageApp sources */ = {
+			isa = PBXBuildFile;
+			fileRef = 140C509D4BFA4A9CAB206C07 /* ProviderSettingsPane.swift */;
+		};
+		88B5A75242F041A2902334CB /* NotificationSettingsPane.swift in UsageApp sources */ = {
+			isa = PBXBuildFile;
+			fileRef = A44408A20FFB44F28C1C6491 /* NotificationSettingsPane.swift */;
+		};
+		6B9BCC09E38C4B228E9C7306 /* GeneralSettingsPane.swift in UsageApp sources */ = {
+			isa = PBXBuildFile;
+			fileRef = 6E6A42DDC3E243C9A877F600 /* GeneralSettingsPane.swift */;
+		};
+		E3FF6C879B9B40B3BFCA1C02 /* SettingsWindowController.swift in UsageApp sources */ = {
+			isa = PBXBuildFile;
+			fileRef = DE78F3ADC2B94AF8962C1936 /* SettingsWindowController.swift */;
+		};
+		667869AE27F54D89AA5EC1D7 /* SettingsPane.swift in UsageApp sources */ = {
+			isa = PBXBuildFile;
+			fileRef = 506ACF47CFDB48A785CA9D13 /* SettingsPane.swift */;
+		};
 		4F589B88588F42EDA09D15A2 /* Provider artwork in Resources */ = {
 			isa = PBXBuildFile;
 			fileRef = 4F589B88588F42EDA09D15A1 /* ProviderArtwork.xcassets */;
-		};
-		418C7377D22C480C9401F1C3 /* PreferencesSection.swift in UsageApp sources */ = {
-			isa = PBXBuildFile;
-			fileRef = 11AD16D1154D41DDB253C0B7 /* PreferencesSection.swift */;
 		};
 		3E7B61445BC54096A9D998F3 /* UpdateChecker.swift in UsageApp sources */ = {
 			isa = PBXBuildFile;
@@ -78,10 +94,6 @@
 		C94D8DD4511F29479780FB31 /* UsageApp compile PanelController.swift */ = {
 			isa = PBXBuildFile;
 			fileRef = 3B3B4D4A60C0DFE694925B83 /* PanelController.swift */;
-		};
-		04AFDAF3D0392DCFBC261210 /* UsageApp compile SetupView.swift */ = {
-			isa = PBXBuildFile;
-			fileRef = 11F226E4D4CF82E2B44B0BB5 /* SetupView.swift */;
 		};
 		2E63B2018E111356AB2AEA83 /* UsageApp compile UsageApp.swift */ = {
 			isa = PBXBuildFile;
@@ -259,16 +271,40 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		140C509D4BFA4A9CAB206C07 /* ProviderSettingsPane.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = ProviderSettingsPane.swift;
+			sourceTree = "<group>";
+		};
+		A44408A20FFB44F28C1C6491 /* NotificationSettingsPane.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = NotificationSettingsPane.swift;
+			sourceTree = "<group>";
+		};
+		6E6A42DDC3E243C9A877F600 /* GeneralSettingsPane.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = GeneralSettingsPane.swift;
+			sourceTree = "<group>";
+		};
+		DE78F3ADC2B94AF8962C1936 /* SettingsWindowController.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = SettingsWindowController.swift;
+			sourceTree = "<group>";
+		};
+		506ACF47CFDB48A785CA9D13 /* SettingsPane.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = SettingsPane.swift;
+			sourceTree = "<group>";
+		};
 		4F589B88588F42EDA09D15A1 /* ProviderArtwork.xcassets */ = {
 			isa = PBXFileReference;
 			lastKnownFileType = folder.assetcatalog;
 			path = ProviderArtwork.xcassets;
-			sourceTree = "<group>";
-		};
-		11AD16D1154D41DDB253C0B7 /* PreferencesSection.swift */ = {
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.swift;
-			path = PreferencesSection.swift;
 			sourceTree = "<group>";
 		};
 		E9C1946D2CCB4FDDA2059D5F /* UpdateChecker.swift */ = {
@@ -380,12 +416,6 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = "PanelController.swift";
-			sourceTree = "<group>";
-		};
-		11F226E4D4CF82E2B44B0BB5 /* SetupView.swift */ = {
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.swift;
-			path = "SetupView.swift";
 			sourceTree = "<group>";
 		};
 		6D9FA8CB2A2A9891A9DF2AAC /* UsageApp.swift */ = {
@@ -619,7 +649,7 @@
 		};
 		97115DFB696E29BDBC2FED51 /* App sources */ = {
 			isa = PBXGroup;
-			children = ( 4F589B88588F42EDA09D15A1 /* ProviderArtwork.xcassets */, 11AD16D1154D41DDB253C0B7 /* PreferencesSection.swift */, E9C1946D2CCB4FDDA2059D5F /* UpdateChecker.swift */, 34CE7F3269FF43D7999004DA /* AlertNotifier.swift */, 20C56C952F5725E8B02AF79D /* ClaudeSetupReview.swift */, 6C6F4A4FFC38EE5E438F6CDA /* ClaudeConnectionControls.swift */, DF2C76B7558531CC2DC5BC80 /* CodexConnectionControls.swift */, F81C5F45FC07D92155D70301 /* PerplexitySetupView.swift */, C6EAD4799D45EC67D2389101 /* HUDGlassSurface.swift */, BBB2BF87DE9E36B578A0675E /* AlwaysHover.swift */, 8133DF61FA09ABB428E6A687 /* AppCoordinator.swift */, 2DA7EC209611D51A6DE7AD88 /* DemoUsage.swift */, 85B921E2BF5DE989EE5C6F8D /* OverlayPanel.swift */, 5C512700D891F08FF5AF891F /* PanelAppearance.swift */, 3B3B4D4A60C0DFE694925B83 /* PanelController.swift */, 11F226E4D4CF82E2B44B0BB5 /* SetupView.swift */, 6D9FA8CB2A2A9891A9DF2AAC /* UsageApp.swift */, 1D48487A7F16C232982B8215 /* UsageDetails.swift */, C771B2BFBE13F02D985F20AD /* UsageModel.swift */, 8BD1167C93052DF627ACCFF1 /* UsageRail.swift */, );
+			children = ( 140C509D4BFA4A9CAB206C07 /* ProviderSettingsPane.swift */, A44408A20FFB44F28C1C6491 /* NotificationSettingsPane.swift */, 6E6A42DDC3E243C9A877F600 /* GeneralSettingsPane.swift */, DE78F3ADC2B94AF8962C1936 /* SettingsWindowController.swift */, 506ACF47CFDB48A785CA9D13 /* SettingsPane.swift */, 4F589B88588F42EDA09D15A1 /* ProviderArtwork.xcassets */, E9C1946D2CCB4FDDA2059D5F /* UpdateChecker.swift */, 34CE7F3269FF43D7999004DA /* AlertNotifier.swift */, 20C56C952F5725E8B02AF79D /* ClaudeSetupReview.swift */, 6C6F4A4FFC38EE5E438F6CDA /* ClaudeConnectionControls.swift */, DF2C76B7558531CC2DC5BC80 /* CodexConnectionControls.swift */, F81C5F45FC07D92155D70301 /* PerplexitySetupView.swift */, C6EAD4799D45EC67D2389101 /* HUDGlassSurface.swift */, BBB2BF87DE9E36B578A0675E /* AlwaysHover.swift */, 8133DF61FA09ABB428E6A687 /* AppCoordinator.swift */, 2DA7EC209611D51A6DE7AD88 /* DemoUsage.swift */, 85B921E2BF5DE989EE5C6F8D /* OverlayPanel.swift */, 5C512700D891F08FF5AF891F /* PanelAppearance.swift */, 3B3B4D4A60C0DFE694925B83 /* PanelController.swift */, 6D9FA8CB2A2A9891A9DF2AAC /* UsageApp.swift */, 1D48487A7F16C232982B8215 /* UsageDetails.swift */, C771B2BFBE13F02D985F20AD /* UsageModel.swift */, 8BD1167C93052DF627ACCFF1 /* UsageRail.swift */, );
 			sourceTree = "<group>";
 			path = "App";
 		};
@@ -726,7 +756,7 @@
 		37C2D22DB962C53675457822 /* UsageApp sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
-			files = ( 418C7377D22C480C9401F1C3 /* PreferencesSection.swift in UsageApp sources */, 3E7B61445BC54096A9D998F3 /* UpdateChecker.swift in UsageApp sources */, BFCC723F98854BF8BA0A4244 /* AlertNotifier.swift in UsageApp sources */, 0F55CBEE9ECB004110C2DE1E /* ClaudeSetupReview.swift in UsageApp sources */, F098187CE4B51349E7B787BD /* ClaudeConnectionControls.swift in UsageApp sources */, DC49BC1098A575E755268045 /* CodexConnectionControls.swift in UsageApp sources */, F81C5F45FC07D92155D70302 /* PerplexitySetupView.swift in Sources */, C6EAD4799D45EC67D2389102 /* HUDGlassSurface.swift in Sources */, B68F55E09B51475095E92BFC /* UsageApp compile AlwaysHover.swift */, 0AE5E9AF94D7A1A784E6B821 /* UsageApp compile AppCoordinator.swift */, E42D457825368F196896A9D0 /* UsageApp compile DemoUsage.swift */, 9F6BD839A7811F48F44EB28D /* UsageApp compile OverlayPanel.swift */, 2C4E21E3085E4C0EDB970371 /* UsageApp compile PanelAppearance.swift */, C94D8DD4511F29479780FB31 /* UsageApp compile PanelController.swift */, 04AFDAF3D0392DCFBC261210 /* UsageApp compile SetupView.swift */, 2E63B2018E111356AB2AEA83 /* UsageApp compile UsageApp.swift */, FE4D17B46F03ED94163CF0D1 /* UsageApp compile UsageDetails.swift */, 2F2320B3C89083AAE3ECDEC5 /* UsageApp compile UsageModel.swift */, CEA47A87715786D4746E3C50 /* UsageApp compile UsageRail.swift */, );
+			files = ( 7F3FCC24D0AC4170B34B79F0 /* ProviderSettingsPane.swift in UsageApp sources */, 88B5A75242F041A2902334CB /* NotificationSettingsPane.swift in UsageApp sources */, 6B9BCC09E38C4B228E9C7306 /* GeneralSettingsPane.swift in UsageApp sources */, E3FF6C879B9B40B3BFCA1C02 /* SettingsWindowController.swift in UsageApp sources */, 667869AE27F54D89AA5EC1D7 /* SettingsPane.swift in UsageApp sources */, 3E7B61445BC54096A9D998F3 /* UpdateChecker.swift in UsageApp sources */, BFCC723F98854BF8BA0A4244 /* AlertNotifier.swift in UsageApp sources */, 0F55CBEE9ECB004110C2DE1E /* ClaudeSetupReview.swift in UsageApp sources */, F098187CE4B51349E7B787BD /* ClaudeConnectionControls.swift in UsageApp sources */, DC49BC1098A575E755268045 /* CodexConnectionControls.swift in UsageApp sources */, F81C5F45FC07D92155D70302 /* PerplexitySetupView.swift in Sources */, C6EAD4799D45EC67D2389102 /* HUDGlassSurface.swift in Sources */, B68F55E09B51475095E92BFC /* UsageApp compile AlwaysHover.swift */, 0AE5E9AF94D7A1A784E6B821 /* UsageApp compile AppCoordinator.swift */, E42D457825368F196896A9D0 /* UsageApp compile DemoUsage.swift */, 9F6BD839A7811F48F44EB28D /* UsageApp compile OverlayPanel.swift */, 2C4E21E3085E4C0EDB970371 /* UsageApp compile PanelAppearance.swift */, C94D8DD4511F29479780FB31 /* UsageApp compile PanelController.swift */, 2E63B2018E111356AB2AEA83 /* UsageApp compile UsageApp.swift */, FE4D17B46F03ED94163CF0D1 /* UsageApp compile UsageDetails.swift */, 2F2320B3C89083AAE3ECDEC5 /* UsageApp compile UsageModel.swift */, CEA47A87715786D4746E3C50 /* UsageApp compile UsageRail.swift */, );
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		3B5951D5248F99DCD0239750 /* usageapp-claude-status sources */ = {

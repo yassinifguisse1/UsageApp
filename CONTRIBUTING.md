@@ -23,7 +23,7 @@ open -n DerivedData/Build/Products/Debug/UsageApp.app --args -demoMode YES
 
 - `Sources/UsageCore` holds providers, parsers, reading history, alerts, trends, and the update check. Everything here is unit tested and has no UI.
 - `Sources/ClaudeStatus` is the status-line helper that Claude Code runs. It must never change the wrapped status line's output or exit status.
-- `App` is the AppKit and SwiftUI app: the edge panel, the cards, and Settings & Usage.
+- `App` is the AppKit and SwiftUI app: the edge panel, the cards, and Settings.
 
 The Xcode project is maintained by hand. When you add a source file, add it to `UsageApp.xcodeproj` as well as to the folder, and check that both `swift test` and `xcodebuild … test` still pass.
 

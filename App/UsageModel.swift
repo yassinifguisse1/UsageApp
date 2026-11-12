@@ -14,13 +14,35 @@ final class UsageModel {
     private var displays: [Provider: ProviderDisplay] = [:]
     private var trends: [Provider: UsageTrend] = [:]
 
-    private(set) var alertsEnabled: Bool
-    private(set) var alertThreshold: Double
-    private(set) var alertsOnReset: Bool
+    // Preferences save themselves, so settings views can bind to them directly.
+    var alertsEnabled: Bool {
+        didSet { defaults.set(alertsEnabled, forKey: "alertsEnabled") }
+    }
+    var alertThreshold: Double {
+        didSet { defaults.set(alertThreshold, forKey: "alertThreshold") }
+    }
+    var alertsOnReset: Bool {
+        didSet { defaults.set(alertsOnReset, forKey: "alertsOnReset") }
+    }
+    var codexRefreshMinutes: Int {
+        didSet {
+            defaults.set(codexRefreshMinutes, forKey: "codexRefreshMinutes")
+            nextCodexRead = min(nextCodexRead, Date.now.addingTimeInterval(TimeInterval(codexRefreshMinutes * 60)))
+        }
+    }
+    var checksForUpdates: Bool {
+        didSet {
+            defaults.set(checksForUpdates, forKey: "checksForUpdates")
+            if !checksForUpdates { availableUpdate = nil }
+        }
+    }
+    var revealsPanelOnHover: Bool {
+        didSet {
+            defaults.set(revealsPanelOnHover, forKey: "revealsPanelOnHover")
+            onPanelSettingsChanged?()
+        }
+    }
     private(set) var hiddenProviders: Set<Provider>
-    private(set) var codexRefreshMinutes: Int
-    private(set) var checksForUpdates: Bool
-    private(set) var revealsPanelOnHover: Bool
     var availableUpdate: AvailableRelease?
 
     let claudeInstaller: ClaudeSetupInstaller
@@ -100,21 +122,6 @@ final class UsageModel {
         return trends[provider]?.points ?? []
     }
 
-    func setAlertsEnabled(_ enabled: Bool) {
-        alertsEnabled = enabled
-        defaults.set(enabled, forKey: "alertsEnabled")
-    }
-
-    func setAlertThreshold(_ threshold: Double) {
-        alertThreshold = threshold
-        defaults.set(threshold, forKey: "alertThreshold")
-    }
-
-    func setAlertsOnReset(_ enabled: Bool) {
-        alertsOnReset = enabled
-        defaults.set(enabled, forKey: "alertsOnReset")
-    }
-
     func setProvider(_ provider: Provider, shown: Bool) {
         var next = hiddenProviders
         if shown { next.remove(provider) } else { next.insert(provider) }
@@ -124,22 +131,16 @@ final class UsageModel {
         onPanelSettingsChanged?()
     }
 
-    func setRevealsPanelOnHover(_ enabled: Bool) {
-        revealsPanelOnHover = enabled
-        defaults.set(enabled, forKey: "revealsPanelOnHover")
-        onPanelSettingsChanged?()
+    /// Whether the panel shows a provider. At least one always stays visible.
+    subscript(showing provider: Provider) -> Bool {
+        get { !hiddenProviders.contains(provider) }
+        set { setProvider(provider, shown: newValue) }
     }
 
-    func setCodexRefreshMinutes(_ minutes: Int) {
-        codexRefreshMinutes = minutes
-        defaults.set(minutes, forKey: "codexRefreshMinutes")
-        nextCodexRead = min(nextCodexRead, Date().addingTimeInterval(TimeInterval(minutes * 60)))
-    }
-
-    func setChecksForUpdates(_ enabled: Bool) {
-        checksForUpdates = enabled
-        defaults.set(enabled, forKey: "checksForUpdates")
-        if !enabled { availableUpdate = nil }
+    /// Demo or live readings, for a settings picker.
+    var usesDemoReadings: Bool {
+        get { isDemo }
+        set { setDemo(newValue) }
     }
 
     private func updateDisplays() {

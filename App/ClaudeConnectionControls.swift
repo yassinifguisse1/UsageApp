@@ -90,7 +90,7 @@ struct ClaudeConnectionControls: View {
     private func copyInstructions() {
         let helper = Bundle.main.url(forAuxiliaryExecutable: "usageapp-claude-status")?.path
             ?? "/Applications/UsageApp.app/Contents/MacOS/usageapp-claude-status"
-        let source = "'" + helper.replacingOccurrences(of: "'", with: "'\\''") + "'"
+        let source = "'" + helper.replacing("'", with: "'\\''") + "'"
         let instructions = """
         Run in Terminal:
           mkdir -p "$HOME/.local/bin"
