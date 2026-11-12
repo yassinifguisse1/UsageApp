@@ -258,12 +258,6 @@ private struct RingTile: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
                     .frame(height: 21)
-
-                if reading.state == .stale {
-                    Text("Stale")
-                        .font(.system(size: 10))
-                        .foregroundStyle(HUDPalette.secondary)
-                }
             } else {
                 Text(reading.state.shortLabel)
                     .font(.system(size: 10, weight: .medium))
@@ -330,10 +324,10 @@ private struct UsageGauge: View {
                             startAngle: .degrees(0),
                             endAngle: .degrees(360)
                         ),
-                        style: StrokeStyle(lineWidth: 4, lineCap: .round)
+                        // Hover thickens the arc slightly. The ring never uses a glow.
+                        style: StrokeStyle(lineWidth: isEmphasized ? 5 : 4, lineCap: .round)
                     )
                     .rotationEffect(.degrees(-90))
-                    .shadow(color: accent.opacity(isEmphasized ? 0.58 : 0.33), radius: isEmphasized ? 5 : 2)
                     .opacity(drawn ? (reading.state == .stale ? 0.58 : 1) : 0)
                     .animation(
                         reduceMotion ? nil : drawn
