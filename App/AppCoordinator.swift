@@ -23,6 +23,8 @@ final class AppCoordinator: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let window: NSWindow
         let gearFrame: NSRect
         let fallbackFrame: NSRect
+        /// The menu hangs below the gear instead of beside it.
+        let opensBelow: Bool
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -83,13 +85,23 @@ final class AppCoordinator: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let menu = makeUsageMenu()
         let gearFrame = window.convertToScreen(anchor.convert(anchor.bounds, to: nil))
         let size = menu.size
-        let rightEdge = window.frame.minX - 6
-        let menuFrame = NSRect(
-            x: rightEdge - size.width, y: gearFrame.midY - size.height / 2,
-            width: size.width, height: size.height
-        )
+        let origin: NSPoint
+        switch model.panelPlacement {
+        case .right: origin = NSPoint(x: window.frame.minX - 6 - size.width, y: gearFrame.midY - size.height / 2)
+        case .left: origin = NSPoint(x: window.frame.maxX + 6, y: gearFrame.midY - size.height / 2)
+        case .notch:
+            let bounds = window.screen?.visibleFrame ?? window.frame
+            origin = NSPoint(
+                x: max(bounds.minX, min(gearFrame.midX - size.width / 2, bounds.maxX - size.width)),
+                y: window.frame.minY - 6 - size.height
+            )
+        }
+        let menuFrame = NSRect(origin: origin, size: size)
         let x = NSApp.userInterfaceLayoutDirection == .rightToLeft ? menuFrame.maxX : menuFrame.minX
-        let hover = PanelMenuHover(menu: menu, window: window, gearFrame: gearFrame, fallbackFrame: menuFrame)
+        let hover = PanelMenuHover(
+            menu: menu, window: window, gearFrame: gearFrame, fallbackFrame: menuFrame,
+            opensBelow: model.panelPlacement == .notch
+        )
         let hoverTimer = Timer(
             timeInterval: 0.05, target: self, selector: #selector(updatePanelMenuHover(_:)),
             userInfo: hover, repeats: true
@@ -114,8 +126,13 @@ final class AppCoordinator: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let visibleFrame = menu.accessibilityFrame()
         let menuFrame = visibleFrame.isEmpty ? hover.fallbackFrame : visibleFrame
         let gearFrame = hover.gearFrame
-        let crossingGap = pointer.x >= menuFrame.maxX && pointer.x <= gearFrame.minX
-            && pointer.y >= gearFrame.minY && pointer.y <= gearFrame.maxY
+        // The strip between the gear and the menu, whichever side the menu opened on.
+        let between = gearFrame.union(menuFrame)
+        let crossingGap = hover.opensBelow
+            ? pointer.x >= gearFrame.minX && pointer.x <= gearFrame.maxX
+                && pointer.y >= between.minY && pointer.y <= between.maxY
+            : pointer.y >= gearFrame.minY && pointer.y <= gearFrame.maxY
+                && pointer.x >= between.minX && pointer.x <= between.maxX
         if gearFrame.contains(pointer) || crossingGap || menuFrame.contains(pointer)
             || containsPointerInSubmenu(pointer, of: menu) {
             panelMenuExitTime = nil
@@ -166,6 +183,17 @@ final class AppCoordinator: NSObject, NSApplicationDelegate, NSMenuDelegate {
             display.state = overlay?.selectedDisplayID == identifier ? .on : .off
             displays.addItem(display)
         }
+        let positions = NSMenu(title: "Position")
+        for placement in PanelPlacement.allCases {
+            let position = item(placement.title, action: #selector(selectPlacement(_:)))
+            position.representedObject = placement.rawValue
+            position.state = model.panelPlacement == placement ? .on : .off
+            positions.addItem(position)
+        }
+        let positionItem = NSMenuItem(title: "Position", action: nil, keyEquivalent: "")
+        positionItem.submenu = positions
+        menu.addItem(positionItem)
+
         let displayItem = NSMenuItem(title: "Display", action: nil, keyEquivalent: "")
         displayItem.submenu = displays
         menu.addItem(displayItem)
@@ -221,6 +249,11 @@ final class AppCoordinator: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc private func selectDisplay(_ sender: NSMenuItem) {
         overlay?.chooseDisplay(sender.representedObject as? String)
+    }
+
+    @objc private func selectPlacement(_ sender: NSMenuItem) {
+        guard let placement = (sender.representedObject as? String).flatMap(PanelPlacement.init) else { return }
+        model.panelPlacement = placement
     }
 
     @objc private func screenChanged() {
