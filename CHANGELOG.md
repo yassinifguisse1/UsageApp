@@ -4,6 +4,10 @@ All notable changes to UsageApp are recorded here. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Fixed
+
+- The floating panel gear opens its menu on the first click, including when you click the padding around the icon.
+
 ## [1.0.0]
 
 First public release.
