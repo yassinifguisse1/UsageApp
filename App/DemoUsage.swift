@@ -20,4 +20,18 @@ enum DemoUsage {
         ])
         return ProviderReading(provider: provider, outcome: .sample(sample))
     }
+
+    /// A plausible climb to the demo headline over the last few hours.
+    static func trend(provider: Provider, at date: Date) -> [UsagePoint] {
+        guard provider != .perplexity,
+              case .sample(let sample) = read(provider: provider, at: date).outcome,
+              let headline = sample.windows.first(where: \.isPrimary) else { return [] }
+        let steps = [0, 0.08, 0.15, 0.31, 0.38, 0.52, 0.6, 0.66, 0.81, 0.9, 1]
+        return steps.enumerated().map { index, fraction in
+            UsagePoint(
+                date: date.addingTimeInterval(Double(index - steps.count + 1) * 20 * 60),
+                percent: headline.usedPercent * fraction
+            )
+        }
+    }
 }

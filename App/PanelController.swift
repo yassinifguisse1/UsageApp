@@ -14,6 +14,7 @@ final class PanelController {
     private var pointerInCard = false
     private var dismissal: Task<Void, Never>?
     private var renderedReading: ProviderDisplay?
+    private var renderedTrend: [UsagePoint] = []
     private var renderedDemo = false
     private var renderedWidth: CGFloat = 0
     private var renderedHeightLimit: CGFloat = 0
@@ -67,11 +68,14 @@ final class PanelController {
             return
         }
         let area = screen.visibleFrame
-        let railTop = (area.midY + UsageRail.providerHeight / 2).rounded()
+        let providers = model.visibleProviders
+        if let shown = model.detailsProvider, !providers.contains(shown) { closeCard() }
+        let railTop = (area.midY + UsageRail.providerHeight(for: providers) / 2).rounded()
+        let height = UsageRail.height(for: providers)
         let frame = NSRect(
             x: area.maxX - UsageRail.width,
-            y: max(area.minY, railTop - UsageRail.height),
-            width: UsageRail.width, height: UsageRail.height
+            y: max(area.minY, railTop - height),
+            width: UsageRail.width, height: height
         )
         rail.setFrame(frame, display: true)
         rail.orderFrontRegardless()
@@ -91,10 +95,13 @@ final class PanelController {
 
         let reading = model.display(for: activeCard)
         let isPinned = model.pinnedProvider == activeCard
-        let details = UsageDetails(reading: reading, isDemo: model.isDemo, isHUD: true, isPinned: isPinned) { [weak self] in
+        let trend = model.trend(for: activeCard)
+        let details = UsageDetails(
+            reading: reading, isDemo: model.isDemo, isHUD: true, isPinned: isPinned, trend: trend
+        ) { [weak self] in
             self?.togglePin(activeCard)
         }
-        let contentChanged = reading != renderedReading || model.isDemo != renderedDemo
+        let contentChanged = reading != renderedReading || trend != renderedTrend || model.isDemo != renderedDemo
             || renderedWidth != width || renderedHeightLimit != heightLimit
         if contentChanged {
             let measure = NSHostingView(rootView: details
@@ -103,12 +110,13 @@ final class PanelController {
                 .fixedSize(horizontal: false, vertical: true))
             renderedHeight = min(heightLimit, max(106, ceil(measure.fittingSize.height)))
             renderedReading = reading
+            renderedTrend = trend
             renderedDemo = model.isDemo
             renderedWidth = width
             renderedHeightLimit = heightLimit
         }
 
-        let center = rail.frame.maxY - UsageRail.ringCenter(for: activeCard)
+        let center = rail.frame.maxY - UsageRail.ringCenter(for: activeCard, in: model.visibleProviders)
         let y = max(available.minY, min(center - renderedHeight / 2, available.maxY - renderedHeight)).rounded()
         let tipY = y + renderedHeight - center
         if contentChanged || renderedTip != tipY || renderedPinned != isPinned {

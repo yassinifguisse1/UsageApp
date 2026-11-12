@@ -4,6 +4,7 @@ import UsageCore
 struct SetupView: View {
     let model: UsageModel
     let chooseExecutable: () -> Void
+    let requestNotifications: () async -> Bool
 
     var body: some View {
         ScrollView {
@@ -31,10 +32,14 @@ struct SetupView: View {
                         .foregroundStyle(.secondary)
                 }
 
+                PreferencesSection(model: model, requestNotifications: requestNotifications)
+                    .padding(16)
+                    .background(.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 12))
+
                 ForEach(Provider.allCases, id: \.self) { provider in
                     let reading = model.display(for: provider)
                     VStack(alignment: .leading, spacing: 14) {
-                        UsageDetails(reading: reading, isDemo: model.isDemo)
+                        UsageDetails(reading: reading, isDemo: model.isDemo, trend: model.trend(for: provider))
                         if !model.isDemo {
                             Divider()
                             switch provider {

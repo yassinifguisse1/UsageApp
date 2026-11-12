@@ -8,8 +8,14 @@ struct UsageRail: View {
     private static let tail: CGFloat = 27
     private static let menuButtonSize: CGFloat = 44
     static let tileHeight: CGFloat = 78
-    static let providerHeight = lead + CGFloat(Provider.allCases.count) * tileHeight + tail
-    static let height = providerHeight + menuButtonSize
+
+    static func providerHeight(for providers: [Provider]) -> CGFloat {
+        lead + CGFloat(providers.count) * tileHeight + tail
+    }
+
+    static func height(for providers: [Provider]) -> CGFloat {
+        providerHeight(for: providers) + menuButtonSize
+    }
 
     let model: UsageModel
     let onHover: (Provider, Bool) -> Void
@@ -18,8 +24,8 @@ struct UsageRail: View {
     @State private var hovered: Provider?
     @State private var menuHovered = false
 
-    static func ringCenter(for provider: Provider) -> CGFloat {
-        let index = Provider.allCases.firstIndex(of: provider) ?? 0
+    static func ringCenter(for provider: Provider, in providers: [Provider]) -> CGFloat {
+        let index = providers.firstIndex(of: provider) ?? 0
         return lead + CGFloat(index) * tileHeight + 23
     }
 
@@ -27,7 +33,7 @@ struct UsageRail: View {
         VStack(spacing: 0) {
             Color.clear.frame(height: Self.lead)
 
-            ForEach(Provider.allCases, id: \.self) { provider in
+            ForEach(model.visibleProviders, id: \.self) { provider in
                 Button {
                     onClick(provider)
                 } label: {
@@ -69,7 +75,7 @@ struct UsageRail: View {
 
             Color.clear.frame(height: Self.tail)
         }
-        .frame(width: Self.width, height: Self.height)
+        .frame(width: Self.width, height: Self.height(for: model.visibleProviders))
         .background {
             HUDGlassSurface(contour: EdgeRailContour())
         }

@@ -109,6 +109,37 @@ import UsageCore
     #expect(model.display(for: .claude).headline?.percent == 20)
 }
 
+@MainActor
+@Test func liveReadingsAlertOnceAndPreferencesPersist() async throws {
+    let (defaults, cleanup) = try isolatedDefaults()
+    defer { cleanup() }
+    defaults.set(false, forKey: "demoMode")
+    defaults.set(true, forKey: "reviewedFirstLiveUsage")
+    let model = UsageModel(
+        defaults: defaults, claudeInstaller: testInstaller(),
+        readCodex: { _ in liveSample(.codex, percent: 93) },
+        readClaude: { _, _ in liveSample(.claude, percent: 20) }
+    )
+    defer { model.stop() }
+    var alerts: [UsageAlert] = []
+    model.onAlerts = { alerts += $0 }
+    model.setAlertsEnabled(true)
+    model.refresh()
+    #expect(await eventually { alerts.map(\.provider) == [.codex] })
+    model.refresh()
+    try await Task.sleep(for: .milliseconds(100))
+    #expect(alerts.count == 1)
+    #expect(alerts.first?.kind == .reached(90))
+
+    model.setProvider(.claude, shown: false)
+    model.setProvider(.codex, shown: false)
+    model.setProvider(.perplexity, shown: false)
+    #expect(model.visibleProviders == [.perplexity])
+    let restored = UsageModel(defaults: defaults, claudeInstaller: testInstaller())
+    #expect(restored.visibleProviders == [.perplexity])
+    #expect(restored.alertsEnabled)
+}
+
 private actor DeferredProvider {
     private var result: ProviderReading?
     private var pending: [CheckedContinuation<ProviderReading, Never>] = []

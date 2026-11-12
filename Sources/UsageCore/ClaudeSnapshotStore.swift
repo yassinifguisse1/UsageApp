@@ -59,7 +59,7 @@ public struct ClaudeSnapshotStore: Sendable {
 
     public func capture(_ payload: Data, observedAt: Date = Date()) throws {
         let sample = try ClaudeUsageParser.parse(payload, observedAt: observedAt)
-        try prepareDirectory()
+        try PrivateFiles.prepare(directory: directory)
 
         let lockPath = directory.appending(path: ".claude-usage.lock").path
         let lock = open(lockPath, O_CREAT | O_WRONLY | O_NOFOLLOW | O_CLOEXEC, 0o600)
@@ -91,31 +91,7 @@ public struct ClaudeSnapshotStore: Sendable {
             return
         }
         let data = try JSONEncoder().encode(record)
-        try replaceSnapshot(with: data)
-    }
-
-    private func prepareDirectory() throws {
-        try FileManager.default.createDirectory(
-            at: directory, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700]
-        )
-        var info = stat()
-        guard lstat(directory.path, &info) == 0,
-              info.st_mode & S_IFMT == S_IFDIR,
-              info.st_uid == geteuid(),
-              info.st_mode & 0o077 == 0 else { throw StoreError.unsafeDirectory }
-    }
-
-    private func replaceSnapshot(with data: Data) throws {
-        var template = Array(directory.appending(path: ".claude-usage.XXXXXX").path.utf8CString)
-        let fd = mkstemp(&template)
-        guard fd >= 0 else { throw StoreError.fileOperation }
-        let temporary = String(decoding: template.dropLast().map(UInt8.init(bitPattern:)), as: UTF8.self)
-        defer { _ = unlink(temporary) }
-
-        let handle = FileHandle(fileDescriptor: fd, closeOnDealloc: true)
-        try handle.write(contentsOf: data)
-        try handle.close()
-        guard rename(temporary, snapshotURL.path) == 0 else { throw StoreError.fileOperation }
+        try PrivateFiles.replace(snapshotURL, with: data)
     }
 
     private struct Record: Codable {

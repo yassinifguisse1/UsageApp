@@ -1,3 +1,4 @@
+import Charts
 import SwiftUI
 import UsageCore
 
@@ -6,6 +7,7 @@ struct UsageDetails: View {
     let isDemo: Bool
     var isHUD = false
     var isPinned = false
+    var trend: [UsagePoint] = []
     var onTogglePin: (() -> Void)?
 
     private var tint: Color { isHUD ? reading.provider.hudTint : reading.provider.tint }
@@ -56,6 +58,9 @@ struct UsageDetails: View {
 
             ForEach(reading.windows) { window in
                 UsageWindowRow(window: window, tint: tint, secondary: secondary, isHUD: isHUD)
+                if window.id == reading.headline?.id, trend.count >= 2 {
+                    UsageSparkline(points: trend, tint: tint, secondary: secondary)
+                }
             }
 
             if let date = reading.observedAt {
@@ -134,6 +139,40 @@ private struct UsageWindowRow: View {
 
     private var resetLabel: String {
         window.resetsAt.map { "Resets \(UsageFormat.date($0))" } ?? "Reset not provided"
+    }
+}
+
+private struct UsageSparkline: View {
+    let points: [UsagePoint]
+    let tint: Color
+    let secondary: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Chart(Array(points.enumerated()), id: \.offset) { _, point in
+                AreaMark(x: .value("Time", point.date), y: .value("Used", point.percent))
+                    .foregroundStyle(LinearGradient(
+                        colors: [tint.opacity(0.32), tint.opacity(0)], startPoint: .top, endPoint: .bottom
+                    ))
+                    .interpolationMethod(.monotone)
+                LineMark(x: .value("Time", point.date), y: .value("Used", point.percent))
+                    .foregroundStyle(tint)
+                    .lineStyle(StrokeStyle(lineWidth: 1.5, lineCap: .round))
+                    .interpolationMethod(.monotone)
+            }
+            .chartYScale(domain: 0...100)
+            .chartXAxis(.hidden)
+            .chartYAxis(.hidden)
+            .frame(height: 30)
+            Text("Since \(UsageFormat.date(points[0].date))")
+                .font(.system(size: 9))
+                .foregroundStyle(secondary)
+        }
+        .accessibilityElement()
+        .accessibilityLabel("Usage trend")
+        .accessibilityValue(
+            "From \(UsageFormat.percent(points[0].percent)) to \(UsageFormat.percent(points[points.count - 1].percent)) used"
+        )
     }
 }
 

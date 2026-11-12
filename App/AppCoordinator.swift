@@ -1,9 +1,12 @@
 import AppKit
 import SwiftUI
+import UsageCore
 
 @MainActor
 final class AppCoordinator: NSObject, NSApplicationDelegate, NSMenuDelegate {
-    private let model = UsageModel()
+    private let model = UsageModel(trendStore: UsageTrendStore())
+    private let notifier = AlertNotifier()
+    private lazy var updates = UpdateChecker(model: model)
     private var overlay: PanelController?
     private var statusItem: NSStatusItem?
     private var setupWindow: NSWindow?
@@ -15,6 +18,8 @@ final class AppCoordinator: NSObject, NSApplicationDelegate, NSMenuDelegate {
             guard let self, self.setupWindow?.isVisible != true else { return }
             self.openSetup()
         }
+        model.onAlerts = { [weak self] in self?.notifier.post($0) }
+        model.onVisibleProvidersChanged = { [weak self] in self?.overlay?.updatePlacement() }
         installMenu()
         NotificationCenter.default.addObserver(
             self, selector: #selector(screenChanged),
@@ -72,6 +77,12 @@ final class AppCoordinator: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
+        if let update = model.availableUpdate {
+            let download = item("Update Available: UsageApp \(update.version.description)…", action: #selector(openUpdate))
+            download.image = NSImage(systemSymbolName: "arrow.down.circle", accessibilityDescription: nil)
+            menu.addItem(download)
+            menu.addItem(.separator())
+        }
         menu.addItem(item(overlay?.isShown == true ? "Hide Panel" : "Show Panel", action: #selector(togglePanel)))
         menu.addItem(item("Refresh Now", action: #selector(refresh), key: "r"))
         menu.addItem(item(model.isDemo ? "Switch to Live Usage" : "Switch to Demo Mode", action: #selector(toggleMode)))
@@ -93,7 +104,7 @@ final class AppCoordinator: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(displayItem)
 
         menu.addItem(.separator())
-        menu.addItem(item("Usage & Setup…", action: #selector(openSetup), key: ","))
+        menu.addItem(item("Settings & Usage…", action: #selector(openSetup), key: ","))
         menu.addItem(item("Quit UsageApp", action: #selector(quit), key: "q"))
     }
 
@@ -106,6 +117,11 @@ final class AppCoordinator: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func tick() {
         model.tick(visible: overlay?.visible == true || setupWindow?.isVisible == true)
         overlay?.updateCard()
+        updates.checkIfDue()
+    }
+
+    @objc private func openUpdate() {
+        if let url = model.availableUpdate?.url { NSWorkspace.shared.open(url) }
     }
 
     @objc private func togglePanel() {
@@ -152,12 +168,14 @@ final class AppCoordinator: NSObject, NSApplicationDelegate, NSMenuDelegate {
             backing: .buffered,
             defer: false
         )
-        window.title = "Usage & Setup"
+        window.title = "Settings & Usage"
         window.collectionBehavior = [.moveToActiveSpace]
         window.contentMinSize = NSSize(width: 360, height: 300)
         window.isReleasedWhenClosed = false
         window.contentView = NSHostingView(rootView: SetupView(
-            model: model, chooseExecutable: { [weak self] in self?.chooseExecutable() }
+            model: model,
+            chooseExecutable: { [weak self] in self?.chooseExecutable() },
+            requestNotifications: { [notifier] in await notifier.requestAuthorization() }
         ))
         window.center()
         return window
