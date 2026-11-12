@@ -12,7 +12,7 @@ Before writing code, open a provider request that answers these questions:
 
 In `Sources/UsageCore/Provider.swift`, add a case to `Provider` with its display `name` and `staleAfter`. Choose `staleAfter` from how often the source updates. Codex uses five minutes and Claude Code fifteen.
 
-The compiler then points to every `switch` that needs the new case, including the colors and monogram in `App/PanelAppearance.swift`.
+The compiler then points to every `switch` that needs the new case, including the colors and logo asset in `App/PanelAppearance.swift`. Add the logo to `App/ProviderArtwork.xcassets` only if its brand guidelines allow it, and credit its source in the README.
 
 ## 2. Parse the data
 

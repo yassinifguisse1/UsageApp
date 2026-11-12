@@ -130,4 +130,6 @@ The edge notch and usage card are inspired by [Codenotch](https://github.com/vin
 
 UsageApp is an independent project distributed under the [MIT license](LICENSE).
 
-Claude Code, Codex, and Perplexity are trademarks of their respective owners. UsageApp is not affiliated with or endorsed by them and ships no provider logos.
+Claude Code, Codex, and Perplexity are trademarks of their respective owners. UsageApp is not affiliated with or endorsed by them.
+
+The provider icons identify their respective services and are excluded from the MIT license. The Claude Code icon comes from [Anthropic’s Claude Code documentation](https://code.claude.com/docs/en/overview). The Codex icons come from the [official OpenAI desktop app](https://openai.com/codex/), and the Perplexity symbols come from [Perplexity’s brand guide](https://live.standards.site/perplexity/logo). Before distributing builds with these icons, review the [Claude Code logo terms](https://code.claude.com/docs/en/legal-and-compliance) and the [OpenAI brand guidelines](https://openai.com/brand/).

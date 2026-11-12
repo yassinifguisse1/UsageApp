@@ -6,6 +6,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4F589B88588F42EDA09D15A2 /* Provider artwork in Resources */ = {
+			isa = PBXBuildFile;
+			fileRef = 4F589B88588F42EDA09D15A1 /* ProviderArtwork.xcassets */;
+		};
 		418C7377D22C480C9401F1C3 /* PreferencesSection.swift in UsageApp sources */ = {
 			isa = PBXBuildFile;
 			fileRef = 11AD16D1154D41DDB253C0B7 /* PreferencesSection.swift */;
@@ -255,6 +259,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4F589B88588F42EDA09D15A1 /* ProviderArtwork.xcassets */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = folder.assetcatalog;
+			path = ProviderArtwork.xcassets;
+			sourceTree = "<group>";
+		};
 		11AD16D1154D41DDB253C0B7 /* PreferencesSection.swift */ = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
@@ -609,7 +619,7 @@
 		};
 		97115DFB696E29BDBC2FED51 /* App sources */ = {
 			isa = PBXGroup;
-			children = ( 11AD16D1154D41DDB253C0B7 /* PreferencesSection.swift */, E9C1946D2CCB4FDDA2059D5F /* UpdateChecker.swift */, 34CE7F3269FF43D7999004DA /* AlertNotifier.swift */, 20C56C952F5725E8B02AF79D /* ClaudeSetupReview.swift */, 6C6F4A4FFC38EE5E438F6CDA /* ClaudeConnectionControls.swift */, DF2C76B7558531CC2DC5BC80 /* CodexConnectionControls.swift */, F81C5F45FC07D92155D70301 /* PerplexitySetupView.swift */, C6EAD4799D45EC67D2389101 /* HUDGlassSurface.swift */, BBB2BF87DE9E36B578A0675E /* AlwaysHover.swift */, 8133DF61FA09ABB428E6A687 /* AppCoordinator.swift */, 2DA7EC209611D51A6DE7AD88 /* DemoUsage.swift */, 85B921E2BF5DE989EE5C6F8D /* OverlayPanel.swift */, 5C512700D891F08FF5AF891F /* PanelAppearance.swift */, 3B3B4D4A60C0DFE694925B83 /* PanelController.swift */, 11F226E4D4CF82E2B44B0BB5 /* SetupView.swift */, 6D9FA8CB2A2A9891A9DF2AAC /* UsageApp.swift */, 1D48487A7F16C232982B8215 /* UsageDetails.swift */, C771B2BFBE13F02D985F20AD /* UsageModel.swift */, 8BD1167C93052DF627ACCFF1 /* UsageRail.swift */, );
+			children = ( 4F589B88588F42EDA09D15A1 /* ProviderArtwork.xcassets */, 11AD16D1154D41DDB253C0B7 /* PreferencesSection.swift */, E9C1946D2CCB4FDDA2059D5F /* UpdateChecker.swift */, 34CE7F3269FF43D7999004DA /* AlertNotifier.swift */, 20C56C952F5725E8B02AF79D /* ClaudeSetupReview.swift */, 6C6F4A4FFC38EE5E438F6CDA /* ClaudeConnectionControls.swift */, DF2C76B7558531CC2DC5BC80 /* CodexConnectionControls.swift */, F81C5F45FC07D92155D70301 /* PerplexitySetupView.swift */, C6EAD4799D45EC67D2389101 /* HUDGlassSurface.swift */, BBB2BF87DE9E36B578A0675E /* AlwaysHover.swift */, 8133DF61FA09ABB428E6A687 /* AppCoordinator.swift */, 2DA7EC209611D51A6DE7AD88 /* DemoUsage.swift */, 85B921E2BF5DE989EE5C6F8D /* OverlayPanel.swift */, 5C512700D891F08FF5AF891F /* PanelAppearance.swift */, 3B3B4D4A60C0DFE694925B83 /* PanelController.swift */, 11F226E4D4CF82E2B44B0BB5 /* SetupView.swift */, 6D9FA8CB2A2A9891A9DF2AAC /* UsageApp.swift */, 1D48487A7F16C232982B8215 /* UsageDetails.swift */, C771B2BFBE13F02D985F20AD /* UsageModel.swift */, 8BD1167C93052DF627ACCFF1 /* UsageRail.swift */, );
 			sourceTree = "<group>";
 			path = "App";
 		};
@@ -707,7 +717,7 @@
 		4F589B88588F42EDA09D15A3 /* UsageApp resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
-			files = ( );
+			files = ( 4F589B88588F42EDA09D15A2 /* Provider artwork in Resources */, );
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */

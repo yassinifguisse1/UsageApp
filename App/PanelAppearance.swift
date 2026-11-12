@@ -43,31 +43,23 @@ struct ProviderMark: View {
     let provider: Provider
     var onDarkSurface = false
     var size: CGFloat = 24
-    /// Inside a usage ring the letter stands alone so the ring stays readable.
-    var isFilled = true
-
-    private var tint: Color { onDarkSurface ? provider.hudTint : provider.tint }
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        RoundedRectangle(cornerRadius: size * 0.28, style: .continuous)
-            .fill(isFilled ? tint : .clear)
-            .overlay {
-                Text(provider.monogram)
-                    .font(.system(size: size * 0.56, weight: .bold, design: .rounded))
-                    .foregroundStyle(isFilled ? (onDarkSurface ? HUDPalette.lower : .white) : tint)
-            }
+        Image(assetName)
+            .renderingMode(.original)
+            .resizable()
+            .interpolation(.high)
+            .scaledToFit()
             .frame(width: size, height: size)
             .accessibilityHidden(true)
     }
-}
 
-extension Provider {
-    /// A neutral mark. The project does not ship provider logos.
-    var monogram: String {
-        switch self {
-        case .claude: "C"
-        case .codex: "X"
-        case .perplexity: "P"
+    private var assetName: String {
+        switch provider {
+        case .claude: "ClaudeCode"
+        case .codex: onDarkSurface || colorScheme == .dark ? "CodexDark" : "CodexLight"
+        case .perplexity: onDarkSurface || colorScheme == .dark ? "PerplexityDark" : "PerplexityLight"
         }
     }
 }

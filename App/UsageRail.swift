@@ -268,7 +268,7 @@ private struct UsageGauge: View {
                     .shadow(color: accent.opacity(isEmphasized ? 0.58 : 0.33), radius: isEmphasized ? 5 : 2)
                     .opacity(reading.state == .stale ? 0.58 : 1)
             }
-            ProviderMark(provider: reading.provider, onDarkSurface: true, size: 27, isFilled: false)
+            ProviderMark(provider: reading.provider, onDarkSurface: true, size: reading.provider == .perplexity ? 23 : 27)
         }
         .frame(width: 42, height: 42)
         .animation(reduceMotion ? nil : .easeOut(duration: 0.16), value: isEmphasized)
