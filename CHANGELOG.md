@@ -4,9 +4,9 @@ All notable changes to UsageApp are recorded here. The format follows [Keep a Ch
 
 ## [Unreleased]
 
-### Fixed
+### Changed
 
-- The floating panel gear opens its menu on the first click, including when you click the padding around the icon.
+- Hover over the floating panel gear to open the UsageApp menu. It closes when the pointer leaves the gear and menu.
 
 ## [1.0.0]
 

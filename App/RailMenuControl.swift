@@ -1,44 +1,50 @@
 import AppKit
 
-final class RailMenuControl: NSButton {
+final class RailMenuControl: NSView {
+    var onHover: (Bool) -> Void
     var onOpen: (NSView) -> Void
+    private var isHovered = false
+    private var pendingOpen: Task<Void, Never>?
 
-    init(onOpen: @escaping (NSView) -> Void) {
+    init(onHover: @escaping (Bool) -> Void, onOpen: @escaping (NSView) -> Void) {
+        self.onHover = onHover
         self.onOpen = onOpen
         super.init(frame: .zero)
-        cell = MenuButtonCell()
-        isBordered = false
-        imagePosition = .imageOnly
-        image = NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil)?
-            .withSymbolConfiguration(.init(pointSize: 16, weight: .medium))
-        toolTip = "Show UsageApp Menu"
-        setAccessibilityLabel("UsageApp Menu")
-        target = self
-        action = #selector(openMenu)
     }
 
     required init?(coder: NSCoder) { nil }
 
-    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
-
-    override func hitTest(_ point: NSPoint) -> NSView? {
-        guard !isHiddenOrHasHiddenAncestor, bounds.contains(convert(point, from: superview)) else { return nil }
-        return self
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        guard trackingAreas.isEmpty else { return }
+        addTrackingArea(NSTrackingArea(
+            rect: .zero, options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited],
+            owner: self, userInfo: nil
+        ))
     }
 
-    @objc private func openMenu() {
-        // Finish the button action before AppKit begins tracking the menu.
-        Task { @MainActor [weak self] in
-            guard let self else { return }
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
+    override func mouseEntered(with event: NSEvent) { setHovered(true) }
+    override func mouseExited(with event: NSEvent) { setHovered(false) }
+
+    private func setHovered(_ inside: Bool) {
+        guard isHovered != inside else { return }
+        isHovered = inside
+        onHover(inside)
+        pendingOpen?.cancel()
+        pendingOpen = nil
+        guard inside else { return }
+
+        pendingOpen = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(220))
+            guard !Task.isCancelled, let self else { return }
+            pendingOpen = nil
             onOpen(self)
-        }
-    }
-}
 
-private final class MenuButtonCell: NSButtonCell {
-    override func hitTest(for event: NSEvent, in cellFrame: NSRect, of controlView: NSView) -> NSCell.HitResult {
-        let point = controlView.convert(event.locationInWindow, from: nil)
-        // The gear's padding is part of the click target.
-        return controlView.isMousePoint(point, in: cellFrame) ? [.contentArea, .trackableArea] : []
+            // Menu tracking can consume the exit event when the pointer moves into the menu.
+            if let window, !bounds.contains(convert(window.mouseLocationOutsideOfEventStream, from: nil)) {
+                setHovered(false)
+            }
+        }
     }
 }

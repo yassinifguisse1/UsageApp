@@ -70,7 +70,9 @@ struct UsageRail: View {
                 }
             }
 
-            RailMenuButton(onOpen: onOpenMenu)
+            Image(systemName: "gearshape")
+                .font(.system(size: 16, weight: .medium))
+                .foregroundStyle(HUDPalette.text)
                 .frame(width: Self.menuButtonSize, height: Self.menuButtonSize)
                 .background {
                     Circle()
@@ -80,8 +82,9 @@ struct UsageRail: View {
                         .accessibilityHidden(true)
                 }
                 .background {
-                    AlwaysHover { menuHovered = $0 }
+                    RailMenuHover(onHover: { menuHovered = $0 }, onOpen: onOpenMenu)
                 }
+                .accessibilityHidden(true)
                 .overlay(alignment: .top) {
                     Capsule()
                         .fill(HUDPalette.track)
@@ -164,17 +167,17 @@ struct EdgeTab: View {
     }
 }
 
-private struct RailMenuButton: NSViewRepresentable {
+private struct RailMenuHover: NSViewRepresentable {
+    let onHover: (Bool) -> Void
     let onOpen: (NSView) -> Void
 
     func makeNSView(context: Context) -> RailMenuControl {
-        let button = RailMenuControl(onOpen: onOpen)
-        button.contentTintColor = NSColor(HUDPalette.text)
-        return button
+        RailMenuControl(onHover: onHover, onOpen: onOpen)
     }
 
-    func updateNSView(_ button: RailMenuControl, context: Context) {
-        button.onOpen = onOpen
+    func updateNSView(_ view: RailMenuControl, context: Context) {
+        view.onHover = onHover
+        view.onOpen = onOpen
     }
 }
 
