@@ -58,8 +58,8 @@ private func temporaryFolder() throws -> URL {
         Issue.record("Missing bridge file should report setup required.")
     }
     try store.capture(noLimits, observedAt: now)
-    if case .unavailable = await provider.read().outcome {} else {
-        Issue.record("An empty callback should report unavailable.")
+    if case .waiting = await provider.read().outcome {} else {
+        Issue.record("An empty callback should report waiting for data.")
     }
 
     let real = Data(#"{"rate_limits":{"seven_day":{"used_percentage":0}}}"#.utf8)
@@ -70,6 +70,28 @@ private func temporaryFolder() throws -> URL {
     try store.capture(real, observedAt: now.addingTimeInterval(-10))
     #expect(try store.read() == original)
     #expect(original.windows.first?.usedPercent == 0)
+}
+
+@Test func unrecognizedClaudeLimitsKeepTheLastReadingAndExplainTheGap() async throws {
+    let folder = try temporaryFolder()
+    defer { try? FileManager.default.removeItem(at: folder) }
+    let store = ClaudeSnapshotStore(directory: folder)
+    let provider = ClaudeProvider(store: store)
+    let now = Date()
+
+    try store.capture(Data(#"{"rate_limits":{"five_hour":{"used_percentage":40}}}"#.utf8), observedAt: now)
+    let original = try #require(try store.read())
+    try store.capture(Data(#"{"rate_limits":{"five_hour":{"used":41}}}"#.utf8), observedAt: now.addingTimeInterval(60))
+    #expect(try store.read() == original)
+    #expect(await provider.read().outcome == .unavailable(Provider.claude.unrecognizedFormatMessage))
+
+    try store.capture(Data(#"{"rate_limits":{"five_hour":{"used_percentage":42}}}"#.utf8), observedAt: now.addingTimeInterval(120))
+    #expect(try store.readState().unrecognizedAt == nil)
+    if case .sample(let sample) = await provider.read().outcome {
+        #expect(sample.windows.first?.usedPercent == 42)
+    } else {
+        Issue.record("A recognized callback should clear the format warning.")
+    }
 }
 
 @Test func aCaptureFailureDoesNotBreakTheOriginalCommand() throws {

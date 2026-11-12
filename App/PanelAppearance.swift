@@ -56,11 +56,40 @@ struct ProviderMark: View {
     }
 
     private var assetName: String {
-        switch provider {
-        case .claude: "ClaudeCode"
-        case .codex: onDarkSurface || colorScheme == .dark ? "CodexDark" : "CodexLight"
-        case .perplexity: onDarkSurface || colorScheme == .dark ? "PerplexityDark" : "PerplexityLight"
+        provider.logoAsset(onDark: onDarkSurface || colorScheme == .dark)
+    }
+}
+
+extension UsageState {
+    /// A one- or two-word state for tight spaces such as the rail and menu badges.
+    var shortLabel: String {
+        switch self {
+        case .setupRequired: "Set up"
+        case .waiting: "Waiting"
+        case .awaitingReset: "Reset due"
+        case .current, .unavailable, .stale: "No data"
         }
+    }
+}
+
+extension Provider {
+    func logoAsset(onDark: Bool) -> String {
+        switch self {
+        case .claude: "ClaudeCode"
+        case .codex: onDark ? "CodexDark" : "CodexLight"
+        case .perplexity: onDark ? "PerplexityDark" : "PerplexityLight"
+        }
+    }
+
+    /// The logo for menus and toolbars. It picks its light or dark artwork each time it draws.
+    func logoImage(size: CGFloat) -> NSImage {
+        let image = NSImage(size: NSSize(width: size, height: size), flipped: false) { rect in
+            let dark = NSAppearance.currentDrawing().bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+            NSImage(named: logoAsset(onDark: dark))?.draw(in: rect.insetBy(dx: size * 0.04, dy: size * 0.04))
+            return true
+        }
+        image.accessibilityDescription = name
+        return image
     }
 }
 

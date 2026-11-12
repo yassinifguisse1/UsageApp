@@ -1,3 +1,4 @@
+import Charts
 import SwiftUI
 import UsageCore
 
@@ -6,6 +7,8 @@ struct UsageDetails: View {
     let isDemo: Bool
     var isHUD = false
     var isPinned = false
+    var trend: [UsagePoint] = []
+    var onTogglePin: (() -> Void)?
 
     private var tint: Color { isHUD ? reading.provider.hudTint : reading.provider.tint }
     private var secondary: Color { isHUD ? HUDPalette.secondary : .secondary }
@@ -18,14 +21,20 @@ struct UsageDetails: View {
                     .font(.system(size: 16, weight: .semibold))
                     .accessibilityAddTraits(.isHeader)
                 Spacer(minLength: 4)
-                if isPinned {
-                    Image(systemName: "pin.fill")
-                        .font(.system(size: 10, weight: .semibold))
-                        .foregroundStyle(tint)
-                        .accessibilityLabel("Pinned")
+                if let onTogglePin {
+                    Button(action: onTogglePin) {
+                        Label(isPinned ? "Unpin details" : "Pin details", systemImage: isPinned ? "pin.fill" : "pin")
+                            .labelStyle(.iconOnly)
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(isPinned ? tint : secondary)
+                            .frame(width: 24, height: 24)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .help(isPinned ? "Unpin and close details" : "Keep details open")
                 }
                 if isDemo || reading.provider == .perplexity && reading.observedAt != nil {
-                    Text(isDemo ? "Demo" : "Manual")
+                    Text(isDemo ? "Demo" : "Manual · Beta")
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(secondary)
                         .padding(.horizontal, 7)
@@ -35,7 +44,8 @@ struct UsageDetails: View {
             }
 
             if reading.windows.isEmpty {
-                Text(reading.state.rawValue)
+                Text(reading.state == .waiting && reading.setupAction == .startClaude
+                     ? "Waiting for Claude Code" : reading.state.rawValue)
                     .font(.subheadline.weight(.semibold))
             }
 
@@ -48,6 +58,9 @@ struct UsageDetails: View {
 
             ForEach(reading.windows) { window in
                 UsageWindowRow(window: window, tint: tint, secondary: secondary, isHUD: isHUD)
+                if window.id == reading.headline?.id, trend.count >= 2 {
+                    UsageSparkline(points: trend, tint: tint, secondary: secondary)
+                }
             }
 
             if let date = reading.observedAt {
@@ -57,9 +70,10 @@ struct UsageDetails: View {
                     .accessibilityHidden(true)
                 HStack(alignment: .firstTextBaseline, spacing: 5) {
                     Image(systemName: "clock")
-                        .font(.system(size: 9))
+                        .font(.system(size: 10))
                         .accessibilityHidden(true)
-                    Text("Captured \(UsageFormat.date(date))")
+                    Text(reading.provider == .perplexity && !isDemo
+                         ? "Recorded \(UsageFormat.date(date))" : "Captured \(UsageFormat.date(date))")
                         .font(.system(size: 10))
                 }
                 .foregroundStyle(secondary)
@@ -128,6 +142,40 @@ private struct UsageWindowRow: View {
     }
 }
 
+private struct UsageSparkline: View {
+    let points: [UsagePoint]
+    let tint: Color
+    let secondary: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Chart(Array(points.enumerated()), id: \.offset) { _, point in
+                AreaMark(x: .value("Time", point.date), y: .value("Used", point.percent))
+                    .foregroundStyle(LinearGradient(
+                        colors: [tint.opacity(0.32), tint.opacity(0)], startPoint: .top, endPoint: .bottom
+                    ))
+                    .interpolationMethod(.monotone)
+                LineMark(x: .value("Time", point.date), y: .value("Used", point.percent))
+                    .foregroundStyle(tint)
+                    .lineStyle(StrokeStyle(lineWidth: 1.5, lineCap: .round))
+                    .interpolationMethod(.monotone)
+            }
+            .chartYScale(domain: 0...100)
+            .chartXAxis(.hidden)
+            .chartYAxis(.hidden)
+            .frame(height: 30)
+            Text("Since \(UsageFormat.date(points[0].date))")
+                .font(.system(size: 10))
+                .foregroundStyle(secondary)
+        }
+        .accessibilityElement()
+        .accessibilityLabel("Usage trend")
+        .accessibilityValue(
+            "From \(UsageFormat.percent(points[0].percent)) to \(UsageFormat.percent(points[points.count - 1].percent)) used"
+        )
+    }
+}
+
 private struct AllowanceTrack: View {
     let percent: Double
     let tint: Color
@@ -155,9 +203,7 @@ private struct AllowanceTrack: View {
 struct UsageCallout: View {
     nonisolated static let tipWidth: CGFloat = 19
 
-    let reading: ProviderDisplay
-    let isDemo: Bool
-    let isPinned: Bool
+    let details: UsageDetails
     let width: CGFloat
     let height: CGFloat
     let tipY: CGFloat
@@ -166,7 +212,7 @@ struct UsageCallout: View {
     var body: some View {
         let contour = CalloutContour(tipY: tipY)
         ScrollView {
-            UsageDetails(reading: reading, isDemo: isDemo, isHUD: true, isPinned: isPinned)
+            details
                 .padding(17)
         }
         .scrollBounceBehavior(.basedOnSize)

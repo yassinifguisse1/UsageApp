@@ -50,6 +50,7 @@ private func withFakeCLI(
     printf '%s\n' '{"id":2,"result":{"account":null}}'
     """#) { executable in
         let reading = await CodexProvider(executable: executable, timeout: 2).read()
+        #expect(reading.setupAction == .signInToCodex)
         if case .setupRequired = reading.outcome {} else {
             Issue.record("An unsigned-in CLI should report setup required: \(reading.outcome)")
         }
@@ -65,4 +66,9 @@ private func withFakeCLI(
         #expect(reading.outcome == .unavailable("Codex did not respond in time. Try Refresh Now."))
         #expect(ProcessInfo.processInfo.systemUptime - started < 2)
     }
+}
+
+@Test func missingCodexOffersInstallInstructions() async {
+    let reading = await CodexProvider(executable: nil).read()
+    #expect(reading.setupAction == .installCodex)
 }

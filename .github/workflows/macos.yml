@@ -20,9 +20,11 @@ jobs:
     name: Test and package macOS app
     if: github.event_name != 'push' || !github.event.deleted
     runs-on: xcode-27
-    timeout-minutes: 20
+    timeout-minutes: 45
     env:
       DEVELOPER_DIR: /Applications/Xcode_27.2.app/Contents/Developer
+      # Pull requests and forks build ad hoc. Pushes and releases sign and notarize when the secrets exist.
+      HAS_SIGNING: ${{ github.event_name != 'pull_request' && secrets.DEVELOPER_ID_P12_BASE64 != '' && secrets.NOTARY_KEY_P8_BASE64 != '' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -39,13 +41,52 @@ jobs:
             -destination 'platform=macOS,arch=arm64' \
             -derivedDataPath "$RUNNER_TEMP/DerivedData" test
 
-      - name: Build and verify universal macOS ZIP
-        shell: bash
+      - name: Require Developer ID signing for releases
+        if: github.ref_type == 'tag' && env.HAS_SIGNING != 'true'
         run: |
+          echo "::error::Release tags need the Developer ID and notary secrets. See CONTRIBUTING.md."
+          exit 1
+
+      - name: Import Developer ID certificate and notary key
+        if: env.HAS_SIGNING == 'true'
+        env:
+          DEVELOPER_ID_P12_BASE64: ${{ secrets.DEVELOPER_ID_P12_BASE64 }}
+          DEVELOPER_ID_P12_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
+          NOTARY_KEY_P8_BASE64: ${{ secrets.NOTARY_KEY_P8_BASE64 }}
+        run: |
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          password=$(uuidgen)
+          echo "$DEVELOPER_ID_P12_BASE64" | base64 --decode > "$RUNNER_TEMP/developer-id.p12"
+          security create-keychain -p "$password" "$keychain"
+          security set-keychain-settings -lut 3600 "$keychain"
+          security unlock-keychain -p "$password" "$keychain"
+          security import "$RUNNER_TEMP/developer-id.p12" -k "$keychain" \
+            -P "$DEVELOPER_ID_P12_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -k "$password" "$keychain" > /dev/null
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+          rm "$RUNNER_TEMP/developer-id.p12"
+          echo "$NOTARY_KEY_P8_BASE64" | base64 --decode > "$RUNNER_TEMP/notary.p8"
+          echo "SIGNING_KEYCHAIN=$keychain" >> "$GITHUB_ENV"
+
+      - name: Build, sign, and verify universal macOS ZIP
+        shell: bash
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
+          NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
+        run: |
+          signing=()
+          if [[ "$HAS_SIGNING" == true ]]; then
+            signing=(
+              CODE_SIGN_IDENTITY="Developer ID Application"
+              DEVELOPMENT_TEAM="$APPLE_TEAM_ID"
+              OTHER_CODE_SIGN_FLAGS="--timestamp --keychain $SIGNING_KEYCHAIN"
+            )
+          fi
           xcodebuild -project UsageApp.xcodeproj -scheme UsageApp \
             -configuration Release -destination 'generic/platform=macOS' \
             -derivedDataPath "$RUNNER_TEMP/DerivedData" \
-            ARCHS='arm64 x86_64' ONLY_ACTIVE_ARCH=NO build
+            ARCHS='arm64 x86_64' ONLY_ACTIVE_ARCH=NO "${signing[@]}" build
 
           app="$RUNNER_TEMP/DerivedData/Build/Products/Release/UsageApp.app"
           if [[ "$GITHUB_REF_TYPE" == tag ]]; then
@@ -58,6 +99,24 @@ jobs:
 
           mkdir -p "$RUNNER_TEMP/release"
           cd "$RUNNER_TEMP/release"
+          if [[ "$HAS_SIGNING" == true ]]; then
+            ditto -c -k --keepParent "$app" notarize.zip
+            xcrun notarytool submit notarize.zip --wait --timeout 30m --output-format json \
+              --key "$RUNNER_TEMP/notary.p8" --key-id "$NOTARY_KEY_ID" --issuer "$NOTARY_ISSUER_ID" \
+              > notary.json || true
+            status=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("status", ""))' notary.json || true)
+            if [[ "$status" != Accepted ]]; then
+              cat notary.json
+              id=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("id", ""))' notary.json || true)
+              [[ -n "$id" ]] && xcrun notarytool log "$id" \
+                --key "$RUNNER_TEMP/notary.p8" --key-id "$NOTARY_KEY_ID" --issuer "$NOTARY_ISSUER_ID"
+              echo "::error::Notarization did not succeed (status: ${status:-unknown})."
+              exit 1
+            fi
+            rm notarize.zip notary.json
+            xcrun stapler staple "$app"
+          fi
+
           ditto -c -k --keepParent "$app" UsageApp-macos-universal.zip
           shasum -a 256 UsageApp-macos-universal.zip > UsageApp-macos-universal.zip.sha256
 
@@ -68,6 +127,16 @@ jobs:
             lipo "$packaged_app/Contents/MacOS/$binary" -verify_arch x86_64
           done
           codesign --verify --deep --strict "$packaged_app"
+          if [[ "$HAS_SIGNING" == true ]]; then
+            xcrun stapler validate "$packaged_app"
+            spctl --assess --type execute --verbose=2 "$packaged_app"
+          fi
+
+      - name: Remove signing keychain
+        if: always() && env.SIGNING_KEYCHAIN != ''
+        run: |
+          security delete-keychain "$SIGNING_KEYCHAIN" || true
+          rm -f "$RUNNER_TEMP/notary.p8"
 
       - name: Upload macOS ZIP and checksum
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -87,7 +156,14 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: write
+    env:
+      HAS_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN != '' }}
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: packaging
+
       - name: Download verified build
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
@@ -108,9 +184,33 @@ jobs:
             fi
           else
             gh release create "$GITHUB_REF_NAME" --verify-tag --draft --generate-notes \
-              --notes 'The universal macOS app is ad hoc signed and has no Apple notarization.'
+              --notes 'Universal macOS app for Apple silicon and Intel, Developer ID signed and notarized. Install with `brew install --cask yassinifguisse1/tap/usageapp` or download the ZIP below.'
           fi
 
           gh release upload "$GITHUB_REF_NAME" --clobber \
             UsageApp-macos-universal.zip UsageApp-macos-universal.zip.sha256
           gh release edit "$GITHUB_REF_NAME" --draft=false
+
+      - name: Update Homebrew tap
+        if: env.HAS_TAP_TOKEN == 'true'
+        shell: bash
+        env:
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          sha=$(cut -d ' ' -f 1 UsageApp-macos-universal.zip.sha256)
+          git clone --depth 1 \
+            "https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/${GITHUB_REPOSITORY_OWNER}/homebrew-tap.git" tap
+          mkdir -p tap/Casks
+          sed -e "s|@VERSION@|$version|" -e "s|@SHA256@|$sha|" -e "s|@REPOSITORY@|$GITHUB_REPOSITORY|g" \
+            packaging/homebrew/usageapp.rb.template > tap/Casks/usageapp.rb
+          cd tap
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Casks/usageapp.rb
+          if git diff --cached --quiet; then
+            echo "The cask is already at $version."
+          else
+            git commit -m "usageapp $version"
+            git push
+          fi

@@ -1,0 +1,31 @@
+name: Provider request
+description: Ask UsageApp to track another AI tool's allowance.
+labels: [provider]
+body:
+  - type: markdown
+    attributes:
+      value: See docs/ADDING_A_PROVIDER.md for what a provider needs. UsageApp only reads documented local sources and never stores credentials.
+  - type: input
+    id: tool
+    attributes:
+      label: Tool
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Where does the usage data come from?
+      description: A CLI command, a local file, or a documented API, with a link to its documentation if there is one.
+    validations:
+      required: true
+  - type: textarea
+    id: windows
+    attributes:
+      label: What does it report?
+      description: Which windows or limits, whether they include reset times, and an anonymized example if you have one.
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contributing
+      options:
+        - label: I'd like to implement this provider.

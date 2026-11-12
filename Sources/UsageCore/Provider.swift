@@ -11,6 +11,10 @@ public enum Provider: String, CaseIterable, Sendable {
         }
     }
 
+    public var unrecognizedFormatMessage: String {
+        "\(name) reported usage in a format this version of UsageApp doesn’t recognize. Check for a UsageApp update."
+    }
+
     public var staleAfter: TimeInterval {
         switch self {
         case .claude: 15 * 60
@@ -46,19 +50,28 @@ public struct UsageSample: Equatable, Sendable {
     }
 }
 
+public enum ProviderSetupAction: Equatable, Sendable {
+    case installCodex, signInToCodex, updateCodex
+    case configureClaude, startClaude
+    case enterPerplexityCredits
+}
+
 public struct ProviderReading: Sendable {
     public enum Outcome: Equatable, Sendable {
         case sample(UsageSample)
         case setupRequired(String)
+        case waiting(String)
         case unavailable(String)
     }
 
     public let provider: Provider
     public let outcome: Outcome
+    public let setupAction: ProviderSetupAction?
 
-    public init(provider: Provider, outcome: Outcome) {
+    public init(provider: Provider, outcome: Outcome, setupAction: ProviderSetupAction? = nil) {
         self.provider = provider
         self.outcome = outcome
+        self.setupAction = setupAction
     }
 }
 

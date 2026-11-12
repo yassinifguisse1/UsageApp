@@ -29,8 +29,8 @@ public struct CodexProvider: UsageProvider {
     public func read() async -> ProviderReading {
         guard let executable, FileManager.default.isExecutableFile(atPath: executable.path) else {
             return ProviderReading(provider: provider, outcome: .setupRequired(
-                "Install the Codex CLI or choose its executable in Usage & Setup."
-            ))
+                "Install the Codex CLI or choose its executable."
+            ), setupAction: .installCodex)
         }
 
         let worker = Task.detached(priority: .utility) {
@@ -45,23 +45,30 @@ public struct CodexProvider: UsageProvider {
 
     private static func fetch(executable: URL, timeout: TimeInterval) -> ProviderReading {
         let outcome: ProviderReading.Outcome
+        var action: ProviderSetupAction?
         do {
             let result = try CodexRPC(executable: executable, timeout: timeout).fetchLimits()
             if let result {
                 let windows = CodexUsageParser.windows(from: result)
-                outcome = windows.isEmpty
-                    ? .unavailable("Codex did not report any allowance windows for this account.")
-                    : .sample(UsageSample(observedAt: Date(), windows: windows))
+                outcome = if !windows.isEmpty {
+                    .sample(UsageSample(observedAt: Date(), windows: windows))
+                } else if CodexUsageParser.reportsLimits(result) {
+                    .unavailable(Provider.codex.unrecognizedFormatMessage)
+                } else {
+                    .unavailable("Codex did not report any allowance windows for this account.")
+                }
             } else {
                 outcome = .setupRequired("Run codex login in Terminal and sign in with ChatGPT.")
+                action = .signInToCodex
             }
         } catch CodexRPC.Failure.timeout {
             outcome = .unavailable("Codex did not respond in time. Try Refresh Now.")
         } catch CodexRPC.Failure.unsupported {
-            outcome = .unavailable("Update the Codex CLI to a version that supports account rate limits.")
+            outcome = .setupRequired("Update the Codex CLI to a version that supports account rate limits.")
+            action = .updateCodex
         } catch {
             outcome = .unavailable("Codex could not read account limits. Check the CLI sign-in and try again.")
         }
-        return ProviderReading(provider: .codex, outcome: outcome)
+        return ProviderReading(provider: .codex, outcome: outcome, setupAction: action)
     }
 }

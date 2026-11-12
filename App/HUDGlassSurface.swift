@@ -13,7 +13,7 @@ struct HUDGlassSurface<Contour: Shape>: View {
             } else {
                 glass
                     .overlay {
-                        contour.fill(HUDPalette.surface.opacity(contrast == .increased ? 0.86 : 0.75))
+                        contour.fill(HUDPalette.surface.opacity(tintOpacity))
                     }
             }
         }
@@ -24,6 +24,14 @@ struct HUDGlassSurface<Contour: Shape>: View {
         .environment(\.colorScheme, .dark)
         .allowsHitTesting(false)
         .accessibilityHidden(true)
+    }
+
+    /// Liquid Glass brings its own legibility, so it needs only a light dark tint. The older frosted
+    /// material needs more to read as a HUD.
+    private var tintOpacity: Double {
+        if contrast == .increased { return 0.86 }
+        if #available(macOS 26, *) { return 0.42 }
+        return 0.75
     }
 
     @ViewBuilder private var glass: some View {

@@ -11,6 +11,12 @@ public enum ClaudeUsageParser {
         }
         return UsageSample(observedAt: observedAt, windows: windows)
     }
+
+    /// True when the payload carries rate-limit entries, recognized or not.
+    public static func reportsLimits(in data: Data) -> Bool {
+        let limits = (try? ProviderJSON.object(from: data))?["rate_limits"] as? ProviderJSON.Object ?? [:]
+        return limits.values.contains { ($0 as? ProviderJSON.Object)?.isEmpty == false }
+    }
 }
 
 enum ClaudeWindow: String, CaseIterable, Codable {
