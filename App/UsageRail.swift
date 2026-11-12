@@ -2,21 +2,20 @@ import SwiftUI
 import UsageCore
 
 struct UsageRail: View {
-    static let width: CGFloat = 86
-    private static let lead: CGFloat = 59
-    private static let tail: CGFloat = 41
-    private static let tileHeight: CGFloat = 103
+    static let width: CGFloat = 76
+    private static let lead: CGFloat = 45
+    private static let tail: CGFloat = 27
+    static let tileHeight: CGFloat = 78
     static let height = lead + CGFloat(Provider.allCases.count) * tileHeight + tail
 
     let model: UsageModel
     let onHover: (Provider, Bool) -> Void
     let onClick: (Provider) -> Void
-    @Environment(\.accessibilityReduceTransparency) private var opaque
     @State private var hovered: Provider?
 
     static func ringCenter(for provider: Provider) -> CGFloat {
         let index = Provider.allCases.firstIndex(of: provider) ?? 0
-        return lead + CGFloat(index) * tileHeight + 28
+        return lead + CGFloat(index) * tileHeight + 23
     }
 
     var body: some View {
@@ -48,8 +47,7 @@ struct UsageRail: View {
         }
         .frame(width: Self.width, height: Self.height)
         .background {
-            EdgeRailContour()
-                .fill(HUDPalette.surface(opaque: opaque))
+            HUDGlassSurface(contour: EdgeRailContour())
         }
         .overlay(alignment: .top) {
             if model.isDemo {
@@ -60,7 +58,7 @@ struct UsageRail: View {
                     .padding(.horizontal, 7)
                     .padding(.vertical, 3)
                     .background(.white.opacity(0.09), in: Capsule())
-                    .padding(.top, 38)
+                    .padding(.top, 27)
                     .offset(x: 4)
                     .accessibilityLabel("Demo mode")
             }
@@ -75,7 +73,7 @@ private struct EdgeRailContour: Shape {
         let top = rect.minY
         let bottom = rect.maxY
         let waist = rect.midX + 7
-        let shoulder: CGFloat = 31
+        let shoulder: CGFloat = 21
 
         return Path { path in
             path.move(to: CGPoint(x: right, y: top))
@@ -85,14 +83,14 @@ private struct EdgeRailContour: Shape {
                 control2: CGPoint(x: right - 17, y: top + shoulder)
             )
             path.addCurve(
-                to: CGPoint(x: left, y: top + 67),
+                to: CGPoint(x: left, y: top + 53),
                 control1: CGPoint(x: left + 21, y: top + shoulder),
-                control2: CGPoint(x: left, y: top + 45)
+                control2: CGPoint(x: left, y: top + 36)
             )
-            path.addLine(to: CGPoint(x: left, y: bottom - 67))
+            path.addLine(to: CGPoint(x: left, y: bottom - 53))
             path.addCurve(
                 to: CGPoint(x: waist, y: bottom - shoulder),
-                control1: CGPoint(x: left, y: bottom - 45),
+                control1: CGPoint(x: left, y: bottom - 36),
                 control2: CGPoint(x: left + 21, y: bottom - shoulder)
             )
             path.addCurve(
@@ -112,40 +110,31 @@ private struct RingTile: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 2) {
             UsageGauge(reading: reading, isEmphasized: hovered || pinned)
-                .padding(.top, 5)
+                .padding(.top, 2)
 
             if let percent = reading.headline?.percent {
                 Text(UsageFormat.percent(percent))
-                    .font(.system(size: 21, weight: .medium).monospacedDigit())
+                    .font(.system(size: 20, weight: .medium).monospacedDigit())
                     .foregroundStyle(HUDPalette.text)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.68)
-                    .padding(.top, 4)
+                    .minimumScaleFactor(0.7)
+                    .frame(height: 21)
+
+                if reading.state == .stale {
+                    Text("Stale")
+                        .font(.system(size: 10))
+                        .foregroundStyle(HUDPalette.secondary)
+                }
             } else {
-                Text("—")
-                    .font(.system(size: 19, weight: .medium))
+                Text(statusLabel)
+                    .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(HUDPalette.secondary)
-                    .padding(.top, 4)
-                    .accessibilityHidden(true)
-            }
-
-            Text(reading.provider.name)
-                .font(.system(size: 10, weight: .semibold))
-                .foregroundStyle(HUDPalette.secondary)
-                .lineLimit(1)
-
-            if let note {
-                Text(note)
-                    .font(.system(size: 10))
-                    .foregroundStyle(HUDPalette.secondary)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 2)
+                    .lineLimit(1)
             }
         }
-        .frame(width: 76, height: 103, alignment: .top)
+        .frame(width: 68, height: UsageRail.tileHeight, alignment: .top)
         .background(alignment: .trailing) {
             if pinned {
                 Capsule()
@@ -162,15 +151,11 @@ private struct RingTile: View {
         .accessibilityHint(pinned ? "Dismisses usage details" : "Pins usage details")
     }
 
-    private var note: String? {
+    private var statusLabel: String {
         switch reading.state {
-        case .current:
-            guard let headline = reading.headline, !headline.window.isPrimary else { return nil }
-            return headline.label == "7-day window" ? "Weekly window" : headline.label
-        case .stale: return "Stale"
-        case .setupRequired: return "Setup required"
-        case .unavailable: return "Unavailable"
-        case .awaitingReset: return "Awaiting reset"
+        case .setupRequired: "Set up"
+        case .awaitingReset: "Reset due"
+        case .current, .unavailable, .stale: "No data"
         }
     }
 
@@ -219,9 +204,9 @@ private struct UsageGauge: View {
                     .shadow(color: accent.opacity(isEmphasized ? 0.58 : 0.33), radius: isEmphasized ? 5 : 2)
                     .opacity(reading.state == .stale ? 0.58 : 1)
             }
-            ProviderMark(provider: reading.provider, onDarkSurface: true, size: 29)
+            ProviderMark(provider: reading.provider, onDarkSurface: true, size: reading.provider == .perplexity ? 23 : 27)
         }
-        .frame(width: 46, height: 46)
+        .frame(width: 42, height: 42)
         .animation(reduceMotion ? nil : .easeOut(duration: 0.16), value: isEmphasized)
         .accessibilityHidden(true)
     }

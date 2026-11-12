@@ -131,6 +131,22 @@
 			isa = PBXBuildFile;
 			fileRef = 4F589B88588F42EDA09D15A1 /* ProviderArtwork.xcassets */;
 		};
+		C6EAD4799D45EC67D2389102 /* HUDGlassSurface.swift in Sources */ = {
+			isa = PBXBuildFile;
+			fileRef = C6EAD4799D45EC67D2389101 /* HUDGlassSurface.swift */;
+		};
+		F81C5F45FC07D92155D70302 /* PerplexitySetupView.swift in Sources */ = {
+			isa = PBXBuildFile;
+			fileRef = F81C5F45FC07D92155D70301 /* PerplexitySetupView.swift */;
+		};
+		6C88DD0897A8386C0A6A1702 /* PerplexityCreditSnapshot.swift in Sources */ = {
+			isa = PBXBuildFile;
+			fileRef = 6C88DD0897A8386C0A6A1701 /* PerplexityCreditSnapshot.swift */;
+		};
+		3E81229DF5425012C9A70C02 /* PerplexityCreditSnapshotTests.swift in Sources */ = {
+			isa = PBXBuildFile;
+			fileRef = 3E81229DF5425012C9A70C01 /* PerplexityCreditSnapshotTests.swift */;
+		};
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -359,6 +375,30 @@
 			path = ProviderArtwork.xcassets;
 			sourceTree = "<group>";
 		};
+		C6EAD4799D45EC67D2389101 /* HUDGlassSurface.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = HUDGlassSurface.swift;
+			sourceTree = "<group>";
+		};
+		F81C5F45FC07D92155D70301 /* PerplexitySetupView.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = PerplexitySetupView.swift;
+			sourceTree = "<group>";
+		};
+		6C88DD0897A8386C0A6A1701 /* PerplexityCreditSnapshot.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = PerplexityCreditSnapshot.swift;
+			sourceTree = "<group>";
+		};
+		3E81229DF5425012C9A70C01 /* PerplexityCreditSnapshotTests.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = PerplexityCreditSnapshotTests.swift;
+			sourceTree = "<group>";
+		};
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -391,7 +431,7 @@
 		};
 		97115DFB696E29BDBC2FED51 /* App sources */ = {
 			isa = PBXGroup;
-			children = ( 4F589B88588F42EDA09D15A1 /* ProviderArtwork.xcassets */, BBB2BF87DE9E36B578A0675E /* AlwaysHover.swift */, 8133DF61FA09ABB428E6A687 /* AppCoordinator.swift */, 2DA7EC209611D51A6DE7AD88 /* DemoUsage.swift */, 85B921E2BF5DE989EE5C6F8D /* OverlayPanel.swift */, 5C512700D891F08FF5AF891F /* PanelAppearance.swift */, 3B3B4D4A60C0DFE694925B83 /* PanelController.swift */, 11F226E4D4CF82E2B44B0BB5 /* SetupView.swift */, 6D9FA8CB2A2A9891A9DF2AAC /* UsageApp.swift */, 1D48487A7F16C232982B8215 /* UsageDetails.swift */, C771B2BFBE13F02D985F20AD /* UsageModel.swift */, 8BD1167C93052DF627ACCFF1 /* UsageRail.swift */, );
+			children = ( F81C5F45FC07D92155D70301 /* PerplexitySetupView.swift */, C6EAD4799D45EC67D2389101 /* HUDGlassSurface.swift */, 4F589B88588F42EDA09D15A1 /* ProviderArtwork.xcassets */, BBB2BF87DE9E36B578A0675E /* AlwaysHover.swift */, 8133DF61FA09ABB428E6A687 /* AppCoordinator.swift */, 2DA7EC209611D51A6DE7AD88 /* DemoUsage.swift */, 85B921E2BF5DE989EE5C6F8D /* OverlayPanel.swift */, 5C512700D891F08FF5AF891F /* PanelAppearance.swift */, 3B3B4D4A60C0DFE694925B83 /* PanelController.swift */, 11F226E4D4CF82E2B44B0BB5 /* SetupView.swift */, 6D9FA8CB2A2A9891A9DF2AAC /* UsageApp.swift */, 1D48487A7F16C232982B8215 /* UsageDetails.swift */, C771B2BFBE13F02D985F20AD /* UsageModel.swift */, 8BD1167C93052DF627ACCFF1 /* UsageRail.swift */, );
 			sourceTree = "<group>";
 			path = "App";
 		};
@@ -403,7 +443,7 @@
 		};
 		E5C9D7030BADA2FE792AD7E4 /* Tests */ = {
 			isa = PBXGroup;
-			children = ( C40DBC9A66D7C9AED2A8DB38 /* ClaudeBridgeTests.swift */, 528B114E85AE6A96298EED83 /* CodexRPCTests.swift */, 1485E37B1CF105AEC8E23C8F /* ParserTests.swift */, EBA6D9C8B08137CDEF6DBA0F /* UsageHistoryTests.swift */, );
+			children = ( 3E81229DF5425012C9A70C01 /* PerplexityCreditSnapshotTests.swift */, C40DBC9A66D7C9AED2A8DB38 /* ClaudeBridgeTests.swift */, 528B114E85AE6A96298EED83 /* CodexRPCTests.swift */, 1485E37B1CF105AEC8E23C8F /* ParserTests.swift */, EBA6D9C8B08137CDEF6DBA0F /* UsageHistoryTests.swift */, );
 			sourceTree = "<group>";
 			path = "Tests/UsageCoreTests";
 		};
@@ -415,7 +455,7 @@
 		};
 		B8E085BC24F59370E06000B0 /* UsageCore sources */ = {
 			isa = PBXGroup;
-			children = ( BDE9BAD3990F883B4E6263E9 /* ClaudeProvider.swift */, 9526F8D1AFC8BC7C866CD0EC /* ClaudeSnapshotStore.swift */, 1F6BF32DA8FEE71286CCA4C4 /* ClaudeStatusCommand.swift */, 9B6766055256E18208B957D9 /* ClaudeUsageParser.swift */, 46CCF3CF9D749DE4A3D216E4 /* CodexProvider.swift */, F8670812DBEA9663AAD1CB86 /* CodexRPC.swift */, D1E456FFC494ABFAAB5FB5B1 /* CodexUsageParser.swift */, 187D7C4ACB8B4E32ED1EFC05 /* Provider.swift */, C7E85D383FE37867A457D90F /* ProviderJSON.swift */, A0D6F5B9352F16650D26F777 /* UsageHistory.swift */, );
+			children = ( 6C88DD0897A8386C0A6A1701 /* PerplexityCreditSnapshot.swift */, BDE9BAD3990F883B4E6263E9 /* ClaudeProvider.swift */, 9526F8D1AFC8BC7C866CD0EC /* ClaudeSnapshotStore.swift */, 1F6BF32DA8FEE71286CCA4C4 /* ClaudeStatusCommand.swift */, 9B6766055256E18208B957D9 /* ClaudeUsageParser.swift */, 46CCF3CF9D749DE4A3D216E4 /* CodexProvider.swift */, F8670812DBEA9663AAD1CB86 /* CodexRPC.swift */, D1E456FFC494ABFAAB5FB5B1 /* CodexUsageParser.swift */, 187D7C4ACB8B4E32ED1EFC05 /* Provider.swift */, C7E85D383FE37867A457D90F /* ProviderJSON.swift */, A0D6F5B9352F16650D26F777 /* UsageHistory.swift */, );
 			path = Sources/UsageCore;
 			sourceTree = "<group>";
 		};
@@ -498,7 +538,7 @@
 		37C2D22DB962C53675457822 /* UsageApp sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
-			files = ( B68F55E09B51475095E92BFC /* UsageApp compile AlwaysHover.swift */, 0AE5E9AF94D7A1A784E6B821 /* UsageApp compile AppCoordinator.swift */, E42D457825368F196896A9D0 /* UsageApp compile DemoUsage.swift */, 9F6BD839A7811F48F44EB28D /* UsageApp compile OverlayPanel.swift */, 2C4E21E3085E4C0EDB970371 /* UsageApp compile PanelAppearance.swift */, C94D8DD4511F29479780FB31 /* UsageApp compile PanelController.swift */, 04AFDAF3D0392DCFBC261210 /* UsageApp compile SetupView.swift */, 2E63B2018E111356AB2AEA83 /* UsageApp compile UsageApp.swift */, FE4D17B46F03ED94163CF0D1 /* UsageApp compile UsageDetails.swift */, 2F2320B3C89083AAE3ECDEC5 /* UsageApp compile UsageModel.swift */, CEA47A87715786D4746E3C50 /* UsageApp compile UsageRail.swift */, );
+			files = ( F81C5F45FC07D92155D70302 /* PerplexitySetupView.swift in Sources */, C6EAD4799D45EC67D2389102 /* HUDGlassSurface.swift in Sources */, B68F55E09B51475095E92BFC /* UsageApp compile AlwaysHover.swift */, 0AE5E9AF94D7A1A784E6B821 /* UsageApp compile AppCoordinator.swift */, E42D457825368F196896A9D0 /* UsageApp compile DemoUsage.swift */, 9F6BD839A7811F48F44EB28D /* UsageApp compile OverlayPanel.swift */, 2C4E21E3085E4C0EDB970371 /* UsageApp compile PanelAppearance.swift */, C94D8DD4511F29479780FB31 /* UsageApp compile PanelController.swift */, 04AFDAF3D0392DCFBC261210 /* UsageApp compile SetupView.swift */, 2E63B2018E111356AB2AEA83 /* UsageApp compile UsageApp.swift */, FE4D17B46F03ED94163CF0D1 /* UsageApp compile UsageDetails.swift */, 2F2320B3C89083AAE3ECDEC5 /* UsageApp compile UsageModel.swift */, CEA47A87715786D4746E3C50 /* UsageApp compile UsageRail.swift */, );
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		3B5951D5248F99DCD0239750 /* usageapp-claude-status sources */ = {
@@ -510,12 +550,12 @@
 		F2D31B9953383076C5881C4F /* UsageAppTests sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
-			files = ( E14A8288F9AB8B98182A7B04 /* UsageAppTests compile ClaudeBridgeTests.swift */, F187B3FFEF6756E1B75EDCD2 /* UsageAppTests compile CodexRPCTests.swift */, B815517B94208B3CA5F59B03 /* UsageAppTests compile ParserTests.swift */, E3767FB3566C8476FE8A1653 /* UsageAppTests compile UsageHistoryTests.swift */, );
+			files = ( 3E81229DF5425012C9A70C02 /* PerplexityCreditSnapshotTests.swift in Sources */, E14A8288F9AB8B98182A7B04 /* UsageAppTests compile ClaudeBridgeTests.swift */, F187B3FFEF6756E1B75EDCD2 /* UsageAppTests compile CodexRPCTests.swift */, B815517B94208B3CA5F59B03 /* UsageAppTests compile ParserTests.swift */, E3767FB3566C8476FE8A1653 /* UsageAppTests compile UsageHistoryTests.swift */, );
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		84305766ECCFD76723C60473 /* UsageCore compile sources */ = {
 			isa = PBXSourcesBuildPhase;
-			files = ( E722B1B68AC75091ACC2ECFE /* ClaudeProvider.swift in UsageCore */, ACF7EAFD62707008C71BED17 /* ClaudeSnapshotStore.swift in UsageCore */, 9AD9DFD66AE609CF36E0FCCA /* ClaudeStatusCommand.swift in UsageCore */, 3890D3BC04763EAE1032F7A5 /* ClaudeUsageParser.swift in UsageCore */, 1554141D4E0625F3E8C943A3 /* CodexProvider.swift in UsageCore */, B959C35E081A085C2435F6AD /* CodexRPC.swift in UsageCore */, 65895E3CEBF98DCE37E5FF9E /* CodexUsageParser.swift in UsageCore */, BC585B9A57161899A2A78773 /* Provider.swift in UsageCore */, 9028A5D8ABEF416D12460FF4 /* ProviderJSON.swift in UsageCore */, 6938079807F33DE4C6969D70 /* UsageHistory.swift in UsageCore */, );
+			files = ( 6C88DD0897A8386C0A6A1702 /* PerplexityCreditSnapshot.swift in Sources */, E722B1B68AC75091ACC2ECFE /* ClaudeProvider.swift in UsageCore */, ACF7EAFD62707008C71BED17 /* ClaudeSnapshotStore.swift in UsageCore */, 9AD9DFD66AE609CF36E0FCCA /* ClaudeStatusCommand.swift in UsageCore */, 3890D3BC04763EAE1032F7A5 /* ClaudeUsageParser.swift in UsageCore */, 1554141D4E0625F3E8C943A3 /* CodexProvider.swift in UsageCore */, B959C35E081A085C2435F6AD /* CodexRPC.swift in UsageCore */, 65895E3CEBF98DCE37E5FF9E /* CodexUsageParser.swift in UsageCore */, BC585B9A57161899A2A78773 /* Provider.swift in UsageCore */, 9028A5D8ABEF416D12460FF4 /* ProviderJSON.swift in UsageCore */, 6938079807F33DE4C6969D70 /* UsageHistory.swift in UsageCore */, );
 			buildActionMask = 2147483647;
 			runOnlyForDeploymentPostprocessing = 0;
 		};

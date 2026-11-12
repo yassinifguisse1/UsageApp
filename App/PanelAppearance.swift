@@ -5,16 +5,14 @@ enum HUDPalette {
     static let upper = Color(red: 0.087, green: 0.096, blue: 0.114)
     static let lower = Color(red: 0.027, green: 0.032, blue: 0.041)
     static let text = Color(red: 0.97, green: 0.975, blue: 0.985)
-    static let secondary = Color(red: 0.67, green: 0.70, blue: 0.75)
+    static let secondary = Color(red: 0.75, green: 0.78, blue: 0.82)
     static let track = Color.white.opacity(0.14)
 
-    static func surface(opaque: Bool) -> LinearGradient {
-        LinearGradient(
-            colors: [upper.opacity(opaque ? 1 : 0.985), lower],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    }
+    static let surface = LinearGradient(
+        colors: [upper, lower],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
 }
 
 extension Provider {
@@ -22,6 +20,7 @@ extension Provider {
         switch self {
         case .claude: Color(red: 1, green: 0.43, blue: 0.24)
         case .codex: Color(red: 0.28, green: 0.88, blue: 0.68)
+        case .perplexity: Color(red: 0.35, green: 0.84, blue: 0.93)
         }
     }
 
@@ -33,6 +32,8 @@ extension Provider {
             case (.claude, false): NSColor(srgbRed: 0.68, green: 0.31, blue: 0.10, alpha: 1)
             case (.codex, true): NSColor(srgbRed: 0.34, green: 0.87, blue: 0.71, alpha: 1)
             case (.codex, false): NSColor(srgbRed: 0.10, green: 0.46, blue: 0.37, alpha: 1)
+            case (.perplexity, true): NSColor(srgbRed: 0.35, green: 0.84, blue: 0.93, alpha: 1)
+            case (.perplexity, false): NSColor(srgbRed: 0.07, green: 0.40, blue: 0.47, alpha: 1)
             }
         })
     }
@@ -58,6 +59,7 @@ struct ProviderMark: View {
         switch provider {
         case .claude: "ClaudeCode"
         case .codex: onDarkSurface || colorScheme == .dark ? "CodexDark" : "CodexLight"
+        case .perplexity: onDarkSurface || colorScheme == .dark ? "PerplexityDark" : "PerplexityLight"
         }
     }
 }

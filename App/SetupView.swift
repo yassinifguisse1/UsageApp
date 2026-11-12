@@ -34,6 +34,10 @@ struct SetupView: View {
 
                 Divider()
 
+                PerplexitySetupView(model: model)
+
+                Divider()
+
                 VStack(alignment: .leading, spacing: 9) {
                     Text("Connect Codex").font(.headline).accessibilityAddTraits(.isHeader)
                     Text("Run `codex login` in Terminal and sign in with ChatGPT. UsageApp looks for Codex in common install locations.")

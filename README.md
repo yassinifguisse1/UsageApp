@@ -1,10 +1,10 @@
 # UsageApp
 
-UsageApp puts Claude Code and Codex allowance rings at the right edge of your Mac display. Each ring shows the main short window when available. Hover to see all reported windows, or click to keep the detail card open. Click again to dismiss it. The menu bar gives you the same readings in **Usage & Setup**, plus display selection, show/hide, and refresh.
+UsageApp puts Claude Code, Codex, and Perplexity allowance rings at the right edge of your Mac display. The Claude Code and Codex rings show the main short window when available. Perplexity shows a manually recorded Computer plan credit balance. Hover to see all reported windows, or click to keep the detail card open. Click again to dismiss it. The menu bar gives you the same readings in **Usage & Setup**, plus display selection, show/hide, and refresh.
 
 ## Build and try the demo
 
-Use macOS 14 or later and Xcode 16 or later. Open **UsageApp.xcodeproj**, select the **UsageApp** scheme with **My Mac** as the destination, and press **Run**. The app appears in the menu bar and opens a panel marked **Demo** on the primary display. Demo readings work without either CLI or a sign-in. Choose **Switch to Live Usage** from the UsageApp menu when ready to connect.
+Use macOS 14 or later and Xcode 16 or later. Open **UsageApp.xcodeproj**, select the **UsageApp** scheme with **My Mac** as the destination, and press **Run**. The app appears in the menu bar and opens a panel marked **Demo** on the primary display. Demo readings work without either CLI or a sign-in. The rail and cards use Liquid Glass on macOS 26 or later when built with Xcode 26 or later, with a frosted material on older versions and an opaque background when Reduce Transparency is on. Choose **Switch to Live Usage** from the UsageApp menu when ready to connect.
 
 To build and test from the repository root:
 
@@ -73,11 +73,15 @@ Use a current Claude Code release with status-line rate-limit fields. A supporte
 
 To undo setup, restore the original `statusLine.command` in the same file, or remove the `statusLine` entry if you added it. You can then remove `~/.local/bin/usageapp-claude-status` and the UsageApp Application Support directory.
 
+## Track Perplexity Computer
+
+Open **Usage & Setup → Track Perplexity Computer → Open Perplexity Usage**. Enter the remaining plan credits and the plan allowance for the same period, and include the reset time if you know it. UsageApp calculates the percentage used and labels it **Manual**. Update it whenever you want a new reading. Perplexity Ask searches are separate from Computer credits. [Perplexity Help Center](https://www.perplexity.ai/help-center/en/articles/13838041-how-credits-work-on-perplexity)
+
 ## Readings and local data
 
 - **Setup required** means the app needs a CLI sign-in or a Claude bridge callback. **Unavailable** means it could not obtain a usable reading. **Stale** shows an older reading with its capture time. Codex marks readings stale after a failed refresh or five minutes. Claude Code marks them stale after 15 minutes.
 - When a reported reset passes, the app withholds that window’s percentage until the provider reports a new period. Other windows can remain available. A reading without a reset timestamp says **Reset not provided**.
-- `~/Library/Application Support/UsageApp/claude-usage.json` holds one owner-private snapshot with window IDs, percentages, reset times, and a capture time. A local lock file coordinates writes from concurrent Claude sessions. Codex readings stay in memory. macOS preferences hold the selected mode, panel visibility, display choice, and optional CLI path. UsageApp stores no credentials, prompts, transcripts, or raw provider payloads and sends no app telemetry.
+- `~/Library/Application Support/UsageApp/claude-usage.json` holds one owner-private snapshot with window IDs, percentages, reset times, and a capture time. A local lock file coordinates writes from concurrent Claude sessions. Codex readings stay in memory. The Perplexity credit balance, allowance, and timestamps are saved in macOS preferences. macOS preferences also hold the selected mode, panel visibility, display choice, and optional CLI path. UsageApp stores no credentials, prompts, transcripts, or raw provider payloads and sends no app telemetry.
 
 ## Manual verification on macOS
 
@@ -90,4 +94,4 @@ The edge notch and usage card are inspired by [Codenotch](https://github.com/vin
 UsageApp is an independent project distributed under the [MIT license](LICENSE).
 
 
-The provider icons identify their respective services and are excluded from the MIT license. The Claude Code icon comes from [Anthropic’s Claude Code documentation](https://code.claude.com/docs/en/overview). The Codex icons come from the [official OpenAI desktop app](https://openai.com/codex/). Before distributing builds with these icons, review the [Claude Code logo terms](https://code.claude.com/docs/en/legal-and-compliance) and the [OpenAI brand guidelines](https://openai.com/brand/).
+The provider icons identify their respective services and are excluded from the MIT license. The Claude Code icon comes from [Anthropic’s Claude Code documentation](https://code.claude.com/docs/en/overview). The Codex icons come from the [official OpenAI desktop app](https://openai.com/codex/), and the Perplexity symbols come from [Perplexity’s brand guide](https://live.standards.site/perplexity/logo). Before distributing builds with these icons, review the [Claude Code logo terms](https://code.claude.com/docs/en/legal-and-compliance) and the [OpenAI brand guidelines](https://openai.com/brand/).

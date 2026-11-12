@@ -8,6 +8,7 @@ final class UsageModel {
     private(set) var codexPath: String?
     private(set) var refreshingCodex = false
     private(set) var pinnedProvider: Provider?
+    private(set) var perplexitySnapshot: PerplexityCreditSnapshot?
     private var displays: [Provider: ProviderDisplay] = [:]
 
     @ObservationIgnored private var now = Date()
@@ -26,6 +27,12 @@ final class UsageModel {
         self.defaults = defaults
         isDemo = defaults.object(forKey: "demoMode") as? Bool ?? true
         codexPath = defaults.string(forKey: "codexPath")
+        if let data = defaults.data(forKey: "perplexityCreditSnapshot"),
+           let snapshot = try? JSONDecoder().decode(PerplexityCreditSnapshot.self, from: data),
+           snapshot.usedPercent != nil {
+            perplexitySnapshot = snapshot
+        }
+        loadPerplexityReading()
         updateDisplays()
     }
 
@@ -39,9 +46,11 @@ final class UsageModel {
             var reading = history[provider] ?? UsageHistory(provider: provider)
             if isDemo {
                 reading = UsageHistory(provider: provider)
-                reading.receive(DemoUsage.read(provider: provider, at: demoStarted), at: now)
+                reading.receive(DemoUsage.read(provider: provider, at: demoStarted), at: demoStarted)
+                next[provider] = reading.display(at: demoStarted)
+            } else {
+                next[provider] = reading.display(at: now)
             }
-            next[provider] = reading.display(at: now)
         }
         if next != displays { displays = next }
     }
@@ -52,10 +61,29 @@ final class UsageModel {
         isDemo = enabled
         defaults.set(enabled, forKey: "demoMode")
         history = [:]
+        loadPerplexityReading()
         queuedCodexRead = false
         codexTask?.cancel()
         claudeTask?.cancel()
         refresh()
+    }
+
+    func setPerplexitySnapshot(_ snapshot: PerplexityCreditSnapshot?) {
+        perplexitySnapshot = snapshot
+        defaults.set(snapshot.flatMap { try? JSONEncoder().encode($0) }, forKey: "perplexityCreditSnapshot")
+        now = Date()
+        loadPerplexityReading()
+        updateDisplays()
+    }
+
+    private func loadPerplexityReading() {
+        var reading = UsageHistory(provider: .perplexity)
+        let manual = perplexitySnapshot?.reading ?? ProviderReading(
+            provider: .perplexity,
+            outcome: .setupRequired("Enter your Perplexity Computer plan credits in Usage & Setup.")
+        )
+        reading.receive(manual, at: now)
+        history[.perplexity] = reading
     }
 
     func setCodexExecutable(_ url: URL?) {

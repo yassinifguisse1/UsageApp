@@ -24,8 +24,8 @@ struct UsageDetails: View {
                         .foregroundStyle(tint)
                         .accessibilityLabel("Pinned")
                 }
-                if isDemo {
-                    Text("Demo")
+                if isDemo || reading.provider == .perplexity && reading.observedAt != nil {
+                    Text(isDemo ? "Demo" : "Manual")
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(secondary)
                         .padding(.horizontal, 7)
@@ -162,8 +162,6 @@ struct UsageCallout: View {
     let height: CGFloat
     let tipY: CGFloat
     let onHover: (Bool) -> Void
-    @Environment(\.accessibilityReduceTransparency) private var opaque
-    @Environment(\.colorSchemeContrast) private var contrast
 
     var body: some View {
         let contour = CalloutContour(tipY: tipY)
@@ -177,11 +175,7 @@ struct UsageCallout: View {
         .foregroundStyle(HUDPalette.text)
         .environment(\.colorScheme, .dark)
         .background {
-            contour.fill(HUDPalette.surface(opaque: opaque))
-        }
-        .overlay {
-            contour.stroke(.white.opacity(contrast == .increased ? 0.34 : 0.12), lineWidth: 1.4)
-                .allowsHitTesting(false)
+            HUDGlassSurface(contour: contour)
         }
         .clipShape(contour)
         .background {
