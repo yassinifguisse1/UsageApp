@@ -3,6 +3,7 @@ import Foundation
 public enum UsageState: String, Equatable, Sendable {
     case current = "Current"
     case setupRequired = "Setup required"
+    case waiting = "Waiting for data"
     case unavailable = "Unavailable"
     case stale = "Stale"
     case awaitingReset = "Awaiting reset update"
@@ -25,11 +26,13 @@ public struct ProviderDisplay: Equatable, Sendable {
     public let windows: [WindowDisplay]
     public let state: UsageState
     public let message: String?
+    public let setupAction: ProviderSetupAction?
 }
 
 public struct UsageHistory: Equatable, Sendable {
     private let provider: Provider
     private var outcome: ProviderReading.Outcome
+    private var setupAction: ProviderSetupAction?
     private var lastSample: UsageSample?
     // A provider can drop the old window at reset. Remember it until a new period is reported.
     private var expiredWindows: [UsageWindow] = []
@@ -43,7 +46,7 @@ public struct UsageHistory: Equatable, Sendable {
         guard reading.provider == provider else { return }
 
         switch reading.outcome {
-        case .setupRequired:
+        case .setupRequired, .waiting:
             lastSample = nil
             expiredWindows = []
         case .unavailable:
@@ -64,6 +67,7 @@ public struct UsageHistory: Equatable, Sendable {
             )
         }
         outcome = reading.outcome
+        setupAction = reading.setupAction
     }
 
     public mutating func recordExpiredWindows(at now: Date) {
@@ -81,6 +85,9 @@ public struct UsageHistory: Equatable, Sendable {
         switch outcome {
         case .setupRequired(let reason):
             fallback = .setupRequired
+            message = reason
+        case .waiting(let reason):
+            fallback = .waiting
             message = reason
         case .unavailable(let reason):
             fallback = lastSample == nil ? .unavailable : .stale
@@ -107,7 +114,8 @@ public struct UsageHistory: Equatable, Sendable {
             headline: headline,
             windows: windows,
             state: headline?.state ?? fallback,
-            message: message
+            message: message,
+            setupAction: setupAction
         )
     }
 }

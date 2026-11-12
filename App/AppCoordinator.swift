@@ -10,7 +10,11 @@ final class AppCoordinator: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var timer: Timer?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        overlay = PanelController(model: model)
+        overlay = PanelController(model: model) { [weak self] in self?.openPanelMenu(from: $0) }
+        model.onFirstLiveSetup = { [weak self] in
+            guard let self, self.setupWindow?.isVisible != true else { return }
+            self.openSetup()
+        }
         installMenu()
         NotificationCenter.default.addObserver(
             self, selector: #selector(screenChanged),
@@ -44,11 +48,26 @@ final class AppCoordinator: NSObject, NSApplicationDelegate, NSMenuDelegate {
         item.button?.image = image
         item.button?.toolTip = "UsageApp"
         item.button?.setAccessibilityLabel("UsageApp")
+        item.menu = makeUsageMenu()
+        statusItem = item
+    }
+
+    private func makeUsageMenu() -> NSMenu {
         let menu = NSMenu(title: "UsageApp")
         menu.delegate = self
-        item.menu = menu
-        statusItem = item
         menuNeedsUpdate(menu)
+        return menu
+    }
+
+    private func openPanelMenu(from anchor: NSView) {
+        guard let window = anchor.window else { return }
+        let menu = makeUsageMenu()
+        let center = window.convertPoint(toScreen: anchor.convert(
+            NSPoint(x: anchor.bounds.midX, y: anchor.bounds.midY), to: nil
+        ))
+        let rightEdge = window.frame.minX - 6
+        let x = NSApp.userInterfaceLayoutDirection == .rightToLeft ? rightEdge : rightEdge - menu.size.width
+        menu.popUp(positioning: nil, at: NSPoint(x: x, y: center.y + menu.size.height / 2), in: nil)
     }
 
     func menuNeedsUpdate(_ menu: NSMenu) {
@@ -121,6 +140,7 @@ final class AppCoordinator: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let window = setupWindow ?? makeSetupWindow()
         setupWindow = window
         NSApp.activate()
+        if window.isMiniaturized { window.deminiaturize(nil) }
         window.makeKeyAndOrderFront(nil)
         tick()
     }
@@ -133,6 +153,7 @@ final class AppCoordinator: NSObject, NSApplicationDelegate, NSMenuDelegate {
             defer: false
         )
         window.title = "Usage & Setup"
+        window.collectionBehavior = [.moveToActiveSpace]
         window.contentMinSize = NSSize(width: 360, height: 300)
         window.isReleasedWhenClosed = false
         window.contentView = NSHostingView(rootView: SetupView(

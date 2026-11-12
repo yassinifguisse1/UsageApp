@@ -58,8 +58,8 @@ private func temporaryFolder() throws -> URL {
         Issue.record("Missing bridge file should report setup required.")
     }
     try store.capture(noLimits, observedAt: now)
-    if case .unavailable = await provider.read().outcome {} else {
-        Issue.record("An empty callback should report unavailable.")
+    if case .waiting = await provider.read().outcome {} else {
+        Issue.record("An empty callback should report waiting for data.")
     }
 
     let real = Data(#"{"rate_limits":{"seven_day":{"used_percentage":0}}}"#.utf8)

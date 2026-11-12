@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 import UsageCore
 
@@ -5,13 +6,17 @@ struct UsageRail: View {
     static let width: CGFloat = 76
     private static let lead: CGFloat = 45
     private static let tail: CGFloat = 27
+    private static let menuButtonSize: CGFloat = 44
     static let tileHeight: CGFloat = 78
-    static let height = lead + CGFloat(Provider.allCases.count) * tileHeight + tail
+    static let providerHeight = lead + CGFloat(Provider.allCases.count) * tileHeight + tail
+    static let height = providerHeight + menuButtonSize
 
     let model: UsageModel
     let onHover: (Provider, Bool) -> Void
     let onClick: (Provider) -> Void
+    let onOpenMenu: (NSView) -> Void
     @State private var hovered: Provider?
+    @State private var menuHovered = false
 
     static func ringCenter(for provider: Provider) -> CGFloat {
         let index = Provider.allCases.firstIndex(of: provider) ?? 0
@@ -29,7 +34,8 @@ struct UsageRail: View {
                     RingTile(
                         reading: model.display(for: provider),
                         hovered: hovered == provider,
-                        pinned: model.pinnedProvider == provider
+                        pinned: model.pinnedProvider == provider,
+                        showingDetails: model.detailsProvider == provider
                     )
                 }
                 .buttonStyle(.plain)
@@ -42,6 +48,24 @@ struct UsageRail: View {
                     }
                 }
             }
+
+            RailMenuButton(onOpen: onOpenMenu)
+                .frame(width: Self.menuButtonSize, height: Self.menuButtonSize)
+                .background {
+                    Circle()
+                        .fill(HUDPalette.track.opacity(menuHovered ? 1 : 0))
+                        .frame(width: 32, height: 32)
+                        .allowsHitTesting(false)
+                        .accessibilityHidden(true)
+                    AlwaysHover { menuHovered = $0 }
+                }
+                .overlay(alignment: .top) {
+                    Capsule()
+                        .fill(HUDPalette.track)
+                        .frame(width: 28, height: 1)
+                        .allowsHitTesting(false)
+                        .accessibilityHidden(true)
+                }
 
             Color.clear.frame(height: Self.tail)
         }
@@ -62,6 +86,38 @@ struct UsageRail: View {
                     .offset(x: 4)
                     .accessibilityLabel("Demo mode")
             }
+        }
+    }
+}
+
+private struct RailMenuButton: NSViewRepresentable {
+    let onOpen: (NSView) -> Void
+
+    func makeNSView(context: Context) -> MenuControl {
+        let button = MenuControl()
+        button.isBordered = false
+        button.imagePosition = .imageOnly
+        button.image = NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil)?
+            .withSymbolConfiguration(.init(pointSize: 16, weight: .medium))
+        button.contentTintColor = NSColor(HUDPalette.text)
+        button.toolTip = "Show UsageApp Menu"
+        button.setAccessibilityLabel("UsageApp Menu")
+        button.target = button
+        button.action = #selector(MenuControl.openMenu)
+        return button
+    }
+
+    func updateNSView(_ button: MenuControl, context: Context) {
+        button.onOpen = onOpen
+    }
+
+    final class MenuControl: NSButton {
+        var onOpen: ((NSView) -> Void)?
+
+        override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
+        @objc func openMenu() {
+            onOpen?(self)
         }
     }
 }
@@ -107,6 +163,7 @@ private struct RingTile: View {
     let reading: ProviderDisplay
     let hovered: Bool
     let pinned: Bool
+    let showingDetails: Bool
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
@@ -148,12 +205,13 @@ private struct RingTile: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(reading.provider.name)
         .accessibilityValue(accessibilityValue)
-        .accessibilityHint(pinned ? "Dismisses usage details" : "Pins usage details")
+        .accessibilityHint(showingDetails ? "Dismisses usage details" : "Shows usage details")
     }
 
     private var statusLabel: String {
         switch reading.state {
         case .setupRequired: "Set up"
+        case .waiting: "Waiting"
         case .awaitingReset: "Reset due"
         case .current, .unavailable, .stale: "No data"
         }

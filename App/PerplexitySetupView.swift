@@ -11,7 +11,6 @@ struct PerplexitySetupView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Track Perplexity Computer").font(.headline).accessibilityAddTraits(.isHeader)
             Text("Enter the plan credit balance and allowance from Perplexity Usage. Enter the reset time if it’s shown.")
                 .foregroundStyle(.secondary)
             Link("Open Perplexity Usage", destination: URL(string: "https://www.perplexity.ai/account/usage")!)

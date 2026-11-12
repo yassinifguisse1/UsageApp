@@ -7,7 +7,7 @@ struct SetupView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 22) {
+            VStack(alignment: .leading, spacing: 16) {
                 HStack {
                     Picker("Usage mode", selection: Binding(get: { model.isDemo }, set: model.setDemo)) {
                         Text("Demo").tag(true)
@@ -17,46 +17,38 @@ struct SetupView: View {
                     .labelsHidden()
                     .frame(maxWidth: 230)
                     Spacer()
-                    if model.refreshingCodex && !model.isDemo {
-                        ProgressView()
-                            .controlSize(.small)
-                            .accessibilityLabel("Refreshing Codex")
+                    if !model.isDemo {
+                        Button("Refresh Now", action: model.refresh)
+                            .keyboardShortcut("r", modifiers: .command)
                     }
-                    Button("Refresh Now", action: model.refresh)
-                        .keyboardShortcut("r", modifiers: .command)
+                }
+
+                if model.isDemo {
+                    Text("These are sample readings. Switch to Live Usage to check or connect each provider.")
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("Connect any provider to start seeing your actual usage.")
+                        .foregroundStyle(.secondary)
                 }
 
                 ForEach(Provider.allCases, id: \.self) { provider in
-                    UsageDetails(reading: model.display(for: provider), isDemo: model.isDemo)
-                        .padding(16)
-                        .background(.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 12))
-                }
-
-                Divider()
-
-                PerplexitySetupView(model: model)
-
-                Divider()
-
-                VStack(alignment: .leading, spacing: 9) {
-                    Text("Connect Codex").font(.headline).accessibilityAddTraits(.isHeader)
-                    Text("Run `codex login` in Terminal and sign in with ChatGPT. UsageApp looks for Codex in common install locations.")
-                        .foregroundStyle(.secondary)
-                    if let path = model.codexPath {
-                        Text(path).font(.callout.monospaced()).textSelection(.enabled)
-                    }
-                    HStack {
-                        Button("Choose Codex Executable…", action: chooseExecutable)
-                        if model.codexPath != nil {
-                            Button("Use Automatic Discovery") { model.setCodexExecutable(nil) }
+                    let reading = model.display(for: provider)
+                    VStack(alignment: .leading, spacing: 14) {
+                        UsageDetails(reading: reading, isDemo: model.isDemo)
+                        if !model.isDemo {
+                            Divider()
+                            switch provider {
+                            case .codex:
+                                CodexConnectionControls(model: model, reading: reading, chooseExecutable: chooseExecutable)
+                            case .claude:
+                                ClaudeConnectionControls(model: model, reading: reading)
+                            case .perplexity:
+                                PerplexitySetupView(model: model)
+                            }
                         }
                     }
-                }
-
-                VStack(alignment: .leading, spacing: 9) {
-                    Text("Connect Claude Code").font(.headline).accessibilityAddTraits(.isHeader)
-                    Text("Follow the README’s Claude Code setup to add the bundled helper and keep your current status line. The first eligible Claude Code response supplies the usage data.")
-                        .foregroundStyle(.secondary)
+                    .padding(16)
+                    .background(.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 12))
                 }
             }
             .padding(22)

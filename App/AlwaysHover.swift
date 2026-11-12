@@ -26,7 +26,7 @@ struct AlwaysHover: NSViewRepresentable {
 
         override func updateTrackingAreas() {
             super.updateTrackingAreas()
-            if let pointerArea { removeTrackingArea(pointerArea) }
+            guard pointerArea == nil else { return }
             let area = NSTrackingArea(
                 rect: .zero, options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited],
                 owner: self, userInfo: nil

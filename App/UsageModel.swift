@@ -7,9 +7,16 @@ final class UsageModel {
     private(set) var isDemo: Bool
     private(set) var codexPath: String?
     private(set) var refreshingCodex = false
+    var detailsProvider: Provider?
     private(set) var pinnedProvider: Provider?
     private(set) var perplexitySnapshot: PerplexityCreditSnapshot?
+    private(set) var claudeConnection = ClaudeSetupConnection()
     private var displays: [Provider: ProviderDisplay] = [:]
+
+    let claudeInstaller: ClaudeSetupInstaller
+    @ObservationIgnored private let readCodex: @Sendable (URL?) async -> ProviderReading
+    @ObservationIgnored private let readClaude: @Sendable (ClaudeSetupConnection, Date?) async -> ProviderReading
+    @ObservationIgnored var onFirstLiveSetup: (() -> Void)?
 
     @ObservationIgnored private var now = Date()
     @ObservationIgnored private var demoStarted = Date()
@@ -22,9 +29,25 @@ final class UsageModel {
     @ObservationIgnored private var claudeTask: Task<Void, Never>?
     @ObservationIgnored private var generation = 0
     @ObservationIgnored private var queuedCodexRead = false
+    @ObservationIgnored private var queuedClaudeRead = false
+    @ObservationIgnored private var pendingLiveSetup = false
+    @ObservationIgnored private var claudeIgnoreBefore: Date?
 
-    init(defaults: UserDefaults = .standard) {
+    init(
+        defaults: UserDefaults = .standard,
+        claudeInstaller: ClaudeSetupInstaller = .personal(
+            bundledHelper: Bundle.main.url(forAuxiliaryExecutable: "usageapp-claude-status")
+        ),
+        readCodex: @escaping @Sendable (URL?) async -> ProviderReading = { await CodexProvider(executable: $0).read() },
+        readClaude: @escaping @Sendable (ClaudeSetupConnection, Date?) async -> ProviderReading = {
+            await ClaudeProvider(connection: $0, ignoreBefore: $1).read()
+        }
+    ) {
         self.defaults = defaults
+        self.claudeInstaller = claudeInstaller
+        self.readCodex = readCodex
+        self.readClaude = readClaude
+        claudeIgnoreBefore = defaults.object(forKey: "claudeIgnoreReadingsBefore") as? Date
         isDemo = defaults.object(forKey: "demoMode") as? Bool ?? true
         codexPath = defaults.string(forKey: "codexPath")
         if let data = defaults.data(forKey: "perplexityCreditSnapshot"),
@@ -32,7 +55,7 @@ final class UsageModel {
            snapshot.usedPercent != nil {
             perplexitySnapshot = snapshot
         }
-        loadPerplexityReading()
+        resetLiveReadings()
         updateDisplays()
     }
 
@@ -53,6 +76,32 @@ final class UsageModel {
             }
         }
         if next != displays { displays = next }
+        updateFirstLiveSetup()
+    }
+
+    private func resetLiveReadings() {
+        history = [:]
+        for (provider, message) in [
+            (Provider.codex, "Checking the local Codex connection."),
+            (Provider.claude, "Checking the Claude Code status line."),
+        ] {
+            var reading = UsageHistory(provider: provider)
+            reading.receive(ProviderReading(provider: provider, outcome: .waiting(message)), at: now)
+            history[provider] = reading
+        }
+        loadPerplexityReading()
+    }
+
+    private func updateFirstLiveSetup() {
+        guard pendingLiveSetup, !isDemo else { return }
+        let decision = LiveSetupDecision.evaluate(
+            readings: Array(displays.values),
+            checking: codexTask != nil || claudeTask != nil
+        )
+        guard decision != .wait else { return }
+        pendingLiveSetup = false
+        defaults.set(true, forKey: "reviewedFirstLiveUsage")
+        if decision == .open { onFirstLiveSetup?() }
     }
 
     func setDemo(_ enabled: Bool) {
@@ -60,9 +109,10 @@ final class UsageModel {
         generation += 1
         isDemo = enabled
         defaults.set(enabled, forKey: "demoMode")
-        history = [:]
-        loadPerplexityReading()
+        pendingLiveSetup = !enabled && !defaults.bool(forKey: "reviewedFirstLiveUsage")
+        resetLiveReadings()
         queuedCodexRead = false
+        queuedClaudeRead = false
         codexTask?.cancel()
         claudeTask?.cancel()
         refresh()
@@ -80,10 +130,44 @@ final class UsageModel {
         var reading = UsageHistory(provider: .perplexity)
         let manual = perplexitySnapshot?.reading ?? ProviderReading(
             provider: .perplexity,
-            outcome: .setupRequired("Enter your Perplexity Computer plan credits in Usage & Setup.")
+            outcome: .setupRequired("Enter your Perplexity Computer plan credits."),
+            setupAction: .enterPerplexityCredits
         )
         reading.receive(manual, at: now)
         history[.perplexity] = reading
+    }
+
+    func checkCodex() {
+        now = Date()
+        refreshCodex()
+        updateDisplays()
+    }
+
+    func checkClaude() {
+        now = Date()
+        refreshClaude()
+        updateDisplays()
+    }
+
+    func claudeSetupChanged(wasUndone: Bool) {
+        now = Date()
+        if wasUndone {
+            claudeIgnoreBefore = now
+            defaults.set(now, forKey: "claudeIgnoreReadingsBefore")
+        }
+        var reading = UsageHistory(provider: .claude)
+        let outcome: ProviderReading.Outcome = wasUndone
+            ? .setupRequired("Connect your Claude Code status line to receive usage.")
+            : .waiting("Use Claude Code normally in a trusted project to receive the first reading.")
+        reading.receive(ProviderReading(
+            provider: .claude, outcome: outcome,
+            setupAction: wasUndone ? .configureClaude : .startClaude
+        ), at: now)
+        history[.claude] = reading
+        if wasUndone { claudeConnection = .init() }
+        claudeTask?.cancel()
+        refreshClaude()
+        updateDisplays()
     }
 
     func setCodexExecutable(_ url: URL?) {
@@ -131,10 +215,10 @@ final class UsageModel {
         nextCodexRead = now.addingTimeInterval(120)
         refreshingCodex = true
         let executable = codexPath.map { URL(filePath: $0) } ?? CodexProvider.findExecutable()
-        let adapter = CodexProvider(executable: executable)
+        let fetch = readCodex
         let currentGeneration = generation
         codexTask = Task { [weak self] in
-            let reading = await adapter.read()
+            let reading = await fetch(executable)
             guard let self else { return }
             self.codexTask = nil
             self.refreshingCodex = false
@@ -149,16 +233,31 @@ final class UsageModel {
     }
 
     private func refreshClaude() {
-        guard !isDemo, claudeTask == nil else { return }
+        guard !isDemo else { return }
+        guard claudeTask == nil else {
+            if claudeTask?.isCancelled == true { queuedClaudeRead = true }
+            return
+        }
         nextClaudeRead = now.addingTimeInterval(5)
-        let adapter = ClaudeProvider()
+        let installer = claudeInstaller
+        let cutoff = claudeIgnoreBefore
+        let fetch = readClaude
         let currentGeneration = generation
         claudeTask = Task { [weak self] in
-            let reading = await adapter.read()
+            let (connection, reading) = await Task.detached(priority: .utility) {
+                let connection = installer.connection()
+                let reading = await fetch(connection, cutoff)
+                return (connection, reading)
+            }.value
             guard let self else { return }
             self.claudeTask = nil
             if !Task.isCancelled, self.generation == currentGeneration {
+                self.claudeConnection = connection
                 self.accept(reading)
+            }
+            if self.queuedClaudeRead {
+                self.queuedClaudeRead = false
+                self.refreshClaude()
             }
         }
     }
@@ -177,7 +276,9 @@ final class UsageModel {
 
     func stop() {
         generation += 1
+        pendingLiveSetup = false
         queuedCodexRead = false
+        queuedClaudeRead = false
         codexTask?.cancel()
         claudeTask?.cancel()
     }

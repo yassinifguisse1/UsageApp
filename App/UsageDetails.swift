@@ -6,6 +6,7 @@ struct UsageDetails: View {
     let isDemo: Bool
     var isHUD = false
     var isPinned = false
+    var onTogglePin: (() -> Void)?
 
     private var tint: Color { isHUD ? reading.provider.hudTint : reading.provider.tint }
     private var secondary: Color { isHUD ? HUDPalette.secondary : .secondary }
@@ -18,11 +19,17 @@ struct UsageDetails: View {
                     .font(.system(size: 16, weight: .semibold))
                     .accessibilityAddTraits(.isHeader)
                 Spacer(minLength: 4)
-                if isPinned {
-                    Image(systemName: "pin.fill")
-                        .font(.system(size: 10, weight: .semibold))
-                        .foregroundStyle(tint)
-                        .accessibilityLabel("Pinned")
+                if let onTogglePin {
+                    Button(action: onTogglePin) {
+                        Label(isPinned ? "Unpin details" : "Pin details", systemImage: isPinned ? "pin.fill" : "pin")
+                            .labelStyle(.iconOnly)
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(isPinned ? tint : secondary)
+                            .frame(width: 24, height: 24)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .help(isPinned ? "Unpin and close details" : "Keep details open")
                 }
                 if isDemo || reading.provider == .perplexity && reading.observedAt != nil {
                     Text(isDemo ? "Demo" : "Manual")
@@ -35,7 +42,8 @@ struct UsageDetails: View {
             }
 
             if reading.windows.isEmpty {
-                Text(reading.state.rawValue)
+                Text(reading.state == .waiting && reading.setupAction == .startClaude
+                     ? "Waiting for Claude Code" : reading.state.rawValue)
                     .font(.subheadline.weight(.semibold))
             }
 
@@ -59,7 +67,8 @@ struct UsageDetails: View {
                     Image(systemName: "clock")
                         .font(.system(size: 9))
                         .accessibilityHidden(true)
-                    Text("Captured \(UsageFormat.date(date))")
+                    Text(reading.provider == .perplexity && !isDemo
+                         ? "Recorded \(UsageFormat.date(date))" : "Captured \(UsageFormat.date(date))")
                         .font(.system(size: 10))
                 }
                 .foregroundStyle(secondary)
@@ -155,9 +164,7 @@ private struct AllowanceTrack: View {
 struct UsageCallout: View {
     nonisolated static let tipWidth: CGFloat = 19
 
-    let reading: ProviderDisplay
-    let isDemo: Bool
-    let isPinned: Bool
+    let details: UsageDetails
     let width: CGFloat
     let height: CGFloat
     let tipY: CGFloat
@@ -166,7 +173,7 @@ struct UsageCallout: View {
     var body: some View {
         let contour = CalloutContour(tipY: tipY)
         ScrollView {
-            UsageDetails(reading: reading, isDemo: isDemo, isHUD: true, isPinned: isPinned)
+            details
                 .padding(17)
         }
         .scrollBounceBehavior(.basedOnSize)
