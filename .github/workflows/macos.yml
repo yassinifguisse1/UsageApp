@@ -1,0 +1,116 @@
+name: macOS CI and Release
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+    tags: ['v*.*.*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macos-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_type == 'branch' || github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    name: Test and package macOS app
+    if: github.event_name != 'push' || !github.event.deleted
+    runs-on: xcode-27
+    timeout-minutes: 20
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_27.2.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Test Swift package
+        run: |
+          xcodebuild -version
+          swift test
+
+      - name: Test Xcode project
+        run: |
+          xcodebuild -project UsageApp.xcodeproj -scheme UsageApp \
+            -destination 'platform=macOS,arch=arm64' \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" test
+
+      - name: Build and verify universal macOS ZIP
+        shell: bash
+        run: |
+          xcodebuild -project UsageApp.xcodeproj -scheme UsageApp \
+            -configuration Release -destination 'generic/platform=macOS' \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
+            ARCHS='arm64 x86_64' ONLY_ACTIVE_ARCH=NO build
+
+          app="$RUNNER_TEMP/DerivedData/Build/Products/Release/UsageApp.app"
+          if [[ "$GITHUB_REF_TYPE" == tag ]]; then
+            version=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Contents/Info.plist")
+            if [[ ! "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ || "$GITHUB_REF_NAME" != "v$version" ]]; then
+              echo "::error::The release tag must be v$version to match the app version."
+              exit 1
+            fi
+          fi
+
+          mkdir -p "$RUNNER_TEMP/release"
+          cd "$RUNNER_TEMP/release"
+          ditto -c -k --keepParent "$app" UsageApp-macos-universal.zip
+          shasum -a 256 UsageApp-macos-universal.zip > UsageApp-macos-universal.zip.sha256
+
+          ditto -x -k UsageApp-macos-universal.zip "$RUNNER_TEMP/release-check"
+          packaged_app="$RUNNER_TEMP/release-check/UsageApp.app"
+          for binary in UsageApp usageapp-claude-status; do
+            lipo "$packaged_app/Contents/MacOS/$binary" -verify_arch arm64
+            lipo "$packaged_app/Contents/MacOS/$binary" -verify_arch x86_64
+          done
+          codesign --verify --deep --strict "$packaged_app"
+
+      - name: Upload macOS ZIP and checksum
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: UsageApp-macos-universal
+          path: ${{ runner.temp }}/release/UsageApp-macos-universal.zip*
+          if-no-files-found: error
+          compression-level: 0
+          overwrite: true
+          retention-days: 14
+
+  release:
+    name: Publish GitHub release
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Download verified build
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: UsageApp-macos-universal
+
+      - name: Publish release assets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          sha256sum --check UsageApp-macos-universal.zip.sha256
+
+          if draft=$(gh release view "$GITHUB_REF_NAME" --json isDraft --jq .isDraft); then
+            if [[ "$draft" == false ]]; then
+              gh release view "$GITHUB_REF_NAME" --json url --jq .url
+              exit 0
+            fi
+          else
+            gh release create "$GITHUB_REF_NAME" --verify-tag --draft --generate-notes \
+              --notes 'The universal macOS app is ad hoc signed and has no Apple notarization.'
+          fi
+
+          gh release upload "$GITHUB_REF_NAME" --clobber \
+            UsageApp-macos-universal.zip UsageApp-macos-universal.zip.sha256
+          gh release edit "$GITHUB_REF_NAME" --draft=false

@@ -1,0 +1,681 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B720405B5089B7559DEA3F3A /* Copy Claude helper */ = {
+			isa = PBXBuildFile;
+			fileRef = 42EDC73E9937F6F4B9022667 /* usageapp-claude-status product */;
+			settings = { ATTRIBUTES = (CodeSignOnCopy, ); };
+		};
+		B68F55E09B51475095E92BFC /* UsageApp compile AlwaysHover.swift */ = {
+			isa = PBXBuildFile;
+			fileRef = BBB2BF87DE9E36B578A0675E /* AlwaysHover.swift */;
+		};
+		0AE5E9AF94D7A1A784E6B821 /* UsageApp compile AppCoordinator.swift */ = {
+			isa = PBXBuildFile;
+			fileRef = 8133DF61FA09ABB428E6A687 /* AppCoordinator.swift */;
+		};
+		E42D457825368F196896A9D0 /* UsageApp compile DemoUsage.swift */ = {
+			isa = PBXBuildFile;
+			fileRef = 2DA7EC209611D51A6DE7AD88 /* DemoUsage.swift */;
+		};
+		9F6BD839A7811F48F44EB28D /* UsageApp compile OverlayPanel.swift */ = {
+			isa = PBXBuildFile;
+			fileRef = 85B921E2BF5DE989EE5C6F8D /* OverlayPanel.swift */;
+		};
+		2C4E21E3085E4C0EDB970371 /* UsageApp compile PanelAppearance.swift */ = {
+			isa = PBXBuildFile;
+			fileRef = 5C512700D891F08FF5AF891F /* PanelAppearance.swift */;
+		};
+		C94D8DD4511F29479780FB31 /* UsageApp compile PanelController.swift */ = {
+			isa = PBXBuildFile;
+			fileRef = 3B3B4D4A60C0DFE694925B83 /* PanelController.swift */;
+		};
+		04AFDAF3D0392DCFBC261210 /* UsageApp compile SetupView.swift */ = {
+			isa = PBXBuildFile;
+			fileRef = 11F226E4D4CF82E2B44B0BB5 /* SetupView.swift */;
+		};
+		2E63B2018E111356AB2AEA83 /* UsageApp compile UsageApp.swift */ = {
+			isa = PBXBuildFile;
+			fileRef = 6D9FA8CB2A2A9891A9DF2AAC /* UsageApp.swift */;
+		};
+		FE4D17B46F03ED94163CF0D1 /* UsageApp compile UsageDetails.swift */ = {
+			isa = PBXBuildFile;
+			fileRef = 1D48487A7F16C232982B8215 /* UsageDetails.swift */;
+		};
+		2F2320B3C89083AAE3ECDEC5 /* UsageApp compile UsageModel.swift */ = {
+			isa = PBXBuildFile;
+			fileRef = C771B2BFBE13F02D985F20AD /* UsageModel.swift */;
+		};
+		CEA47A87715786D4746E3C50 /* UsageApp compile UsageRail.swift */ = {
+			isa = PBXBuildFile;
+			fileRef = 8BD1167C93052DF627ACCFF1 /* UsageRail.swift */;
+		};
+		6597184BC89085BCE63E36B0 /* UsageApp links UsageCore */ = {
+			isa = PBXBuildFile;
+			fileRef = 006FAEE9C75CBE505B3FB439 /* libUsageCore.a */;
+		};
+		E706DDC8899C30D4193F3009 /* usageapp-claude-status compile ClaudeStatus/main.swift */ = {
+			isa = PBXBuildFile;
+			fileRef = C020FC50EEA4C9FF04315609 /* ClaudeStatus/main.swift */;
+		};
+		14660FB870B5D8151FA50A94 /* usageapp-claude-status links UsageCore */ = {
+			isa = PBXBuildFile;
+			fileRef = 006FAEE9C75CBE505B3FB439 /* libUsageCore.a */;
+		};
+		E14A8288F9AB8B98182A7B04 /* UsageAppTests compile ClaudeBridgeTests.swift */ = {
+			isa = PBXBuildFile;
+			fileRef = C40DBC9A66D7C9AED2A8DB38 /* ClaudeBridgeTests.swift */;
+		};
+		F187B3FFEF6756E1B75EDCD2 /* UsageAppTests compile CodexRPCTests.swift */ = {
+			isa = PBXBuildFile;
+			fileRef = 528B114E85AE6A96298EED83 /* CodexRPCTests.swift */;
+		};
+		B815517B94208B3CA5F59B03 /* UsageAppTests compile ParserTests.swift */ = {
+			isa = PBXBuildFile;
+			fileRef = 1485E37B1CF105AEC8E23C8F /* ParserTests.swift */;
+		};
+		E3767FB3566C8476FE8A1653 /* UsageAppTests compile UsageHistoryTests.swift */ = {
+			isa = PBXBuildFile;
+			fileRef = EBA6D9C8B08137CDEF6DBA0F /* UsageHistoryTests.swift */;
+		};
+		21343CDA4CBFF8934CDC1A8E /* UsageAppTests links UsageCore */ = {
+			isa = PBXBuildFile;
+			fileRef = 006FAEE9C75CBE505B3FB439 /* libUsageCore.a */;
+		};
+		E722B1B68AC75091ACC2ECFE /* ClaudeProvider.swift in UsageCore */ = {
+			isa = PBXBuildFile;
+			fileRef = BDE9BAD3990F883B4E6263E9 /* ClaudeProvider.swift */;
+		};
+		ACF7EAFD62707008C71BED17 /* ClaudeSnapshotStore.swift in UsageCore */ = {
+			isa = PBXBuildFile;
+			fileRef = 9526F8D1AFC8BC7C866CD0EC /* ClaudeSnapshotStore.swift */;
+		};
+		9AD9DFD66AE609CF36E0FCCA /* ClaudeStatusCommand.swift in UsageCore */ = {
+			isa = PBXBuildFile;
+			fileRef = 1F6BF32DA8FEE71286CCA4C4 /* ClaudeStatusCommand.swift */;
+		};
+		3890D3BC04763EAE1032F7A5 /* ClaudeUsageParser.swift in UsageCore */ = {
+			isa = PBXBuildFile;
+			fileRef = 9B6766055256E18208B957D9 /* ClaudeUsageParser.swift */;
+		};
+		1554141D4E0625F3E8C943A3 /* CodexProvider.swift in UsageCore */ = {
+			isa = PBXBuildFile;
+			fileRef = 46CCF3CF9D749DE4A3D216E4 /* CodexProvider.swift */;
+		};
+		B959C35E081A085C2435F6AD /* CodexRPC.swift in UsageCore */ = {
+			isa = PBXBuildFile;
+			fileRef = F8670812DBEA9663AAD1CB86 /* CodexRPC.swift */;
+		};
+		65895E3CEBF98DCE37E5FF9E /* CodexUsageParser.swift in UsageCore */ = {
+			isa = PBXBuildFile;
+			fileRef = D1E456FFC494ABFAAB5FB5B1 /* CodexUsageParser.swift */;
+		};
+		BC585B9A57161899A2A78773 /* Provider.swift in UsageCore */ = {
+			isa = PBXBuildFile;
+			fileRef = 187D7C4ACB8B4E32ED1EFC05 /* Provider.swift */;
+		};
+		9028A5D8ABEF416D12460FF4 /* ProviderJSON.swift in UsageCore */ = {
+			isa = PBXBuildFile;
+			fileRef = C7E85D383FE37867A457D90F /* ProviderJSON.swift */;
+		};
+		6938079807F33DE4C6969D70 /* UsageHistory.swift in UsageCore */ = {
+			isa = PBXBuildFile;
+			fileRef = A0D6F5B9352F16650D26F777 /* UsageHistory.swift */;
+		};
+		4F589B88588F42EDA09D15A2 /* Provider artwork in Resources */ = {
+			isa = PBXBuildFile;
+			fileRef = 4F589B88588F42EDA09D15A1 /* ProviderArtwork.xcassets */;
+		};
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		0BCD0BD871149E50A82B2893 /* Claude helper proxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2DD2B225212C1DF17AC79F4F /* UsageApp project */;
+			proxyType = 1;
+			remoteGlobalIDString = 775C71ECE85470D53A47BEEC;
+			remoteInfo = "usageapp-claude-status";
+		};
+		506D7F82091EE439E7EE89DA /* UsageCore proxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2DD2B225212C1DF17AC79F4F /* UsageApp project */;
+			proxyType = 1;
+			remoteGlobalIDString = 6B2F5703B9F76D1D2983A901;
+			remoteInfo = UsageCore;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		794ADB52CFAC8601EAB7D965 /* Embed Claude status-line helper */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			files = ( B720405B5089B7559DEA3F3A /* Copy Claude helper */, );
+			runOnlyForDeploymentPostprocessing = 0;
+			dstPath = "";
+			dstSubfolderSpec = 6;
+			name = "Embed Claude Status-Line Helper";
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		1A1D60E8C65B11B2ACD66DFF /* UsageApp.app */ = {
+			isa = PBXFileReference;
+			explicitFileType = wrapper.application;
+			includeInIndex = 0;
+			path = "UsageApp.app";
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		42EDC73E9937F6F4B9022667 /* usageapp-claude-status product */ = {
+			isa = PBXFileReference;
+			explicitFileType = "compiled.mach-o.executable";
+			includeInIndex = 0;
+			path = "usageapp-claude-status";
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		29847C1BE489B3D9E9393238 /* UsageAppTests.xctest */ = {
+			isa = PBXFileReference;
+			explicitFileType = wrapper.cfbundle;
+			includeInIndex = 0;
+			path = "UsageAppTests.xctest";
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		BBB2BF87DE9E36B578A0675E /* AlwaysHover.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "AlwaysHover.swift";
+			sourceTree = "<group>";
+		};
+		8133DF61FA09ABB428E6A687 /* AppCoordinator.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "AppCoordinator.swift";
+			sourceTree = "<group>";
+		};
+		2DA7EC209611D51A6DE7AD88 /* DemoUsage.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "DemoUsage.swift";
+			sourceTree = "<group>";
+		};
+		85B921E2BF5DE989EE5C6F8D /* OverlayPanel.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "OverlayPanel.swift";
+			sourceTree = "<group>";
+		};
+		5C512700D891F08FF5AF891F /* PanelAppearance.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "PanelAppearance.swift";
+			sourceTree = "<group>";
+		};
+		3B3B4D4A60C0DFE694925B83 /* PanelController.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "PanelController.swift";
+			sourceTree = "<group>";
+		};
+		11F226E4D4CF82E2B44B0BB5 /* SetupView.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "SetupView.swift";
+			sourceTree = "<group>";
+		};
+		6D9FA8CB2A2A9891A9DF2AAC /* UsageApp.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "UsageApp.swift";
+			sourceTree = "<group>";
+		};
+		1D48487A7F16C232982B8215 /* UsageDetails.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "UsageDetails.swift";
+			sourceTree = "<group>";
+		};
+		C771B2BFBE13F02D985F20AD /* UsageModel.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "UsageModel.swift";
+			sourceTree = "<group>";
+		};
+		8BD1167C93052DF627ACCFF1 /* UsageRail.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "UsageRail.swift";
+			sourceTree = "<group>";
+		};
+		C020FC50EEA4C9FF04315609 /* ClaudeStatus/main.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "main.swift";
+			sourceTree = "<group>";
+		};
+		C40DBC9A66D7C9AED2A8DB38 /* ClaudeBridgeTests.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "ClaudeBridgeTests.swift";
+			sourceTree = "<group>";
+		};
+		528B114E85AE6A96298EED83 /* CodexRPCTests.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "CodexRPCTests.swift";
+			sourceTree = "<group>";
+		};
+		1485E37B1CF105AEC8E23C8F /* ParserTests.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "ParserTests.swift";
+			sourceTree = "<group>";
+		};
+		EBA6D9C8B08137CDEF6DBA0F /* UsageHistoryTests.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "UsageHistoryTests.swift";
+			sourceTree = "<group>";
+		};
+		F913940C58E8744A2AF1C68B /* Package.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = Package.swift;
+			sourceTree = "<group>";
+		};
+		006FAEE9C75CBE505B3FB439 /* libUsageCore.a */ = {
+			isa = PBXFileReference;
+			explicitFileType = archive.ar;
+			includeInIndex = 0;
+			path = libUsageCore.a;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		BDE9BAD3990F883B4E6263E9 /* ClaudeProvider.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = ClaudeProvider.swift;
+			sourceTree = "<group>";
+		};
+		9526F8D1AFC8BC7C866CD0EC /* ClaudeSnapshotStore.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = ClaudeSnapshotStore.swift;
+			sourceTree = "<group>";
+		};
+		1F6BF32DA8FEE71286CCA4C4 /* ClaudeStatusCommand.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = ClaudeStatusCommand.swift;
+			sourceTree = "<group>";
+		};
+		9B6766055256E18208B957D9 /* ClaudeUsageParser.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = ClaudeUsageParser.swift;
+			sourceTree = "<group>";
+		};
+		46CCF3CF9D749DE4A3D216E4 /* CodexProvider.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = CodexProvider.swift;
+			sourceTree = "<group>";
+		};
+		F8670812DBEA9663AAD1CB86 /* CodexRPC.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = CodexRPC.swift;
+			sourceTree = "<group>";
+		};
+		D1E456FFC494ABFAAB5FB5B1 /* CodexUsageParser.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = CodexUsageParser.swift;
+			sourceTree = "<group>";
+		};
+		187D7C4ACB8B4E32ED1EFC05 /* Provider.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = Provider.swift;
+			sourceTree = "<group>";
+		};
+		C7E85D383FE37867A457D90F /* ProviderJSON.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = ProviderJSON.swift;
+			sourceTree = "<group>";
+		};
+		A0D6F5B9352F16650D26F777 /* UsageHistory.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = UsageHistory.swift;
+			sourceTree = "<group>";
+		};
+		4F589B88588F42EDA09D15A1 /* ProviderArtwork.xcassets */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = folder.assetcatalog;
+			path = ProviderArtwork.xcassets;
+			sourceTree = "<group>";
+		};
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		74ECBA17E397C83DFD43AD90 /* UsageApp linked libraries */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = ( 6597184BC89085BCE63E36B0 /* UsageApp links UsageCore */, );
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		728A7C4F730A813624C0E55A /* usageapp-claude-status linked libraries */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = ( 14660FB870B5D8151FA50A94 /* usageapp-claude-status links UsageCore */, );
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AF4DCF120EA3E12F77CB7067 /* UsageAppTests linked libraries */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = ( 21343CDA4CBFF8934CDC1A8E /* UsageAppTests links UsageCore */, );
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		4EDC8BFAFC6BD936B849F38C /* Products */ = {
+			isa = PBXGroup;
+			children = ( 006FAEE9C75CBE505B3FB439 /* libUsageCore.a */, 1A1D60E8C65B11B2ACD66DFF /* UsageApp.app */, 42EDC73E9937F6F4B9022667 /* usageapp-claude-status product */, 29847C1BE489B3D9E9393238 /* UsageAppTests.xctest */, );
+			sourceTree = "<group>";
+			name = "Products";
+		};
+		97115DFB696E29BDBC2FED51 /* App sources */ = {
+			isa = PBXGroup;
+			children = ( 4F589B88588F42EDA09D15A1 /* ProviderArtwork.xcassets */, BBB2BF87DE9E36B578A0675E /* AlwaysHover.swift */, 8133DF61FA09ABB428E6A687 /* AppCoordinator.swift */, 2DA7EC209611D51A6DE7AD88 /* DemoUsage.swift */, 85B921E2BF5DE989EE5C6F8D /* OverlayPanel.swift */, 5C512700D891F08FF5AF891F /* PanelAppearance.swift */, 3B3B4D4A60C0DFE694925B83 /* PanelController.swift */, 11F226E4D4CF82E2B44B0BB5 /* SetupView.swift */, 6D9FA8CB2A2A9891A9DF2AAC /* UsageApp.swift */, 1D48487A7F16C232982B8215 /* UsageDetails.swift */, C771B2BFBE13F02D985F20AD /* UsageModel.swift */, 8BD1167C93052DF627ACCFF1 /* UsageRail.swift */, );
+			sourceTree = "<group>";
+			path = "App";
+		};
+		2CB380116D41CA8543797808 /* Status-line helper */ = {
+			isa = PBXGroup;
+			children = ( C020FC50EEA4C9FF04315609 /* ClaudeStatus/main.swift */, );
+			sourceTree = "<group>";
+			path = "Sources/ClaudeStatus";
+		};
+		E5C9D7030BADA2FE792AD7E4 /* Tests */ = {
+			isa = PBXGroup;
+			children = ( C40DBC9A66D7C9AED2A8DB38 /* ClaudeBridgeTests.swift */, 528B114E85AE6A96298EED83 /* CodexRPCTests.swift */, 1485E37B1CF105AEC8E23C8F /* ParserTests.swift */, EBA6D9C8B08137CDEF6DBA0F /* UsageHistoryTests.swift */, );
+			sourceTree = "<group>";
+			path = "Tests/UsageCoreTests";
+		};
+		938798C75F4A426A5F3CB536 /* UsageApp project files */ = {
+			isa = PBXGroup;
+			children = ( B8E085BC24F59370E06000B0 /* UsageCore sources */, 97115DFB696E29BDBC2FED51 /* App sources */, 2CB380116D41CA8543797808 /* Status-line helper */, E5C9D7030BADA2FE792AD7E4 /* Tests */, F913940C58E8744A2AF1C68B /* Package.swift */, 4EDC8BFAFC6BD936B849F38C /* Products */, );
+			sourceTree = "<group>";
+			name = "UsageApp project files";
+		};
+		B8E085BC24F59370E06000B0 /* UsageCore sources */ = {
+			isa = PBXGroup;
+			children = ( BDE9BAD3990F883B4E6263E9 /* ClaudeProvider.swift */, 9526F8D1AFC8BC7C866CD0EC /* ClaudeSnapshotStore.swift */, 1F6BF32DA8FEE71286CCA4C4 /* ClaudeStatusCommand.swift */, 9B6766055256E18208B957D9 /* ClaudeUsageParser.swift */, 46CCF3CF9D749DE4A3D216E4 /* CodexProvider.swift */, F8670812DBEA9663AAD1CB86 /* CodexRPC.swift */, D1E456FFC494ABFAAB5FB5B1 /* CodexUsageParser.swift */, 187D7C4ACB8B4E32ED1EFC05 /* Provider.swift */, C7E85D383FE37867A457D90F /* ProviderJSON.swift */, A0D6F5B9352F16650D26F777 /* UsageHistory.swift */, );
+			path = Sources/UsageCore;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		6581B8A217E021E4D8E22779 /* UsageApp target */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 880E38FCA854AC2EA07AB183 /* UsageApp configurations */;
+			buildPhases = ( 37C2D22DB962C53675457822 /* UsageApp sources */, 74ECBA17E397C83DFD43AD90 /* UsageApp linked libraries */, 4F589B88588F42EDA09D15A3 /* UsageApp resources */, 794ADB52CFAC8601EAB7D965 /* Embed Claude status-line helper */, );
+			buildRules = ();
+			dependencies = ( 96167581C63954D9EE99F9E9 /* Build bundled Claude helper */, F3E0244253E950D469920F29 /* UsageApp depends on UsageCore */, );
+			name = "UsageApp";
+			productName = "UsageApp";
+			productReference = 1A1D60E8C65B11B2ACD66DFF /* UsageApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+		775C71ECE85470D53A47BEEC /* Claude helper target */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DAE01AA66CEDEFA0464E6599 /* usageapp-claude-status configurations */;
+			buildPhases = ( 3B5951D5248F99DCD0239750 /* usageapp-claude-status sources */, 728A7C4F730A813624C0E55A /* usageapp-claude-status linked libraries */, );
+			buildRules = ();
+			dependencies = ( 291A62894A89E311F88316B5 /* Claude helper depends on UsageCore */, );
+			name = "usageapp-claude-status";
+			productName = "usageapp-claude-status";
+			productReference = 42EDC73E9937F6F4B9022667 /* usageapp-claude-status product */;
+			productType = "com.apple.product-type.tool";
+		};
+		6D2D64E93F947C80C053548A /* UsageAppTests target */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 019DF59C56E58947B6E0FEED /* UsageAppTests configurations */;
+			buildPhases = ( F2D31B9953383076C5881C4F /* UsageAppTests sources */, AF4DCF120EA3E12F77CB7067 /* UsageAppTests linked libraries */, );
+			buildRules = ();
+			dependencies = ( 2926A5B64D0EB654BBAF11AA /* UsageAppTests depends on UsageCore */, );
+			name = "UsageAppTests";
+			productName = "UsageAppTests";
+			productReference = 29847C1BE489B3D9E9393238 /* UsageAppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		6B2F5703B9F76D1D2983A901 /* UsageCore target */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E077460FF18DC0C33825F0BF /* UsageCore configurations */;
+			buildPhases = ( 84305766ECCFD76723C60473 /* UsageCore compile sources */, );
+			buildRules = ();
+			dependencies = ();
+			name = UsageCore;
+			productName = UsageCore;
+			productReference = 006FAEE9C75CBE505B3FB439 /* libUsageCore.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		2DD2B225212C1DF17AC79F4F /* UsageApp project */ = {
+			isa = PBXProject;
+			attributes = { LastSwiftUpdateCheck = 1600; LastUpgradeCheck = 1600; };
+			buildConfigurationList = 9CFF64D8AE28E83EB00193AA /* Project configurations */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = ( en, Base, );
+			mainGroup = 938798C75F4A426A5F3CB536 /* UsageApp project files */;
+			productRefGroup = 4EDC8BFAFC6BD936B849F38C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = ( 6B2F5703B9F76D1D2983A901 /* UsageCore target */, 6581B8A217E021E4D8E22779 /* UsageApp target */, 775C71ECE85470D53A47BEEC /* Claude helper target */, 6D2D64E93F947C80C053548A /* UsageAppTests target */, );
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		4F589B88588F42EDA09D15A3 /* UsageApp resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = ( 4F589B88588F42EDA09D15A2 /* Provider artwork in Resources */, );
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		37C2D22DB962C53675457822 /* UsageApp sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = ( B68F55E09B51475095E92BFC /* UsageApp compile AlwaysHover.swift */, 0AE5E9AF94D7A1A784E6B821 /* UsageApp compile AppCoordinator.swift */, E42D457825368F196896A9D0 /* UsageApp compile DemoUsage.swift */, 9F6BD839A7811F48F44EB28D /* UsageApp compile OverlayPanel.swift */, 2C4E21E3085E4C0EDB970371 /* UsageApp compile PanelAppearance.swift */, C94D8DD4511F29479780FB31 /* UsageApp compile PanelController.swift */, 04AFDAF3D0392DCFBC261210 /* UsageApp compile SetupView.swift */, 2E63B2018E111356AB2AEA83 /* UsageApp compile UsageApp.swift */, FE4D17B46F03ED94163CF0D1 /* UsageApp compile UsageDetails.swift */, 2F2320B3C89083AAE3ECDEC5 /* UsageApp compile UsageModel.swift */, CEA47A87715786D4746E3C50 /* UsageApp compile UsageRail.swift */, );
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3B5951D5248F99DCD0239750 /* usageapp-claude-status sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = ( E706DDC8899C30D4193F3009 /* usageapp-claude-status compile ClaudeStatus/main.swift */, );
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F2D31B9953383076C5881C4F /* UsageAppTests sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = ( E14A8288F9AB8B98182A7B04 /* UsageAppTests compile ClaudeBridgeTests.swift */, F187B3FFEF6756E1B75EDCD2 /* UsageAppTests compile CodexRPCTests.swift */, B815517B94208B3CA5F59B03 /* UsageAppTests compile ParserTests.swift */, E3767FB3566C8476FE8A1653 /* UsageAppTests compile UsageHistoryTests.swift */, );
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		84305766ECCFD76723C60473 /* UsageCore compile sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = ( E722B1B68AC75091ACC2ECFE /* ClaudeProvider.swift in UsageCore */, ACF7EAFD62707008C71BED17 /* ClaudeSnapshotStore.swift in UsageCore */, 9AD9DFD66AE609CF36E0FCCA /* ClaudeStatusCommand.swift in UsageCore */, 3890D3BC04763EAE1032F7A5 /* ClaudeUsageParser.swift in UsageCore */, 1554141D4E0625F3E8C943A3 /* CodexProvider.swift in UsageCore */, B959C35E081A085C2435F6AD /* CodexRPC.swift in UsageCore */, 65895E3CEBF98DCE37E5FF9E /* CodexUsageParser.swift in UsageCore */, BC585B9A57161899A2A78773 /* Provider.swift in UsageCore */, 9028A5D8ABEF416D12460FF4 /* ProviderJSON.swift in UsageCore */, 6938079807F33DE4C6969D70 /* UsageHistory.swift in UsageCore */, );
+			buildActionMask = 2147483647;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		96167581C63954D9EE99F9E9 /* Build bundled Claude helper */ = {
+			isa = PBXTargetDependency;
+			target = 775C71ECE85470D53A47BEEC /* Claude helper target */;
+			targetProxy = 0BCD0BD871149E50A82B2893 /* Claude helper proxy */;
+		};
+		F3E0244253E950D469920F29 /* UsageApp depends on UsageCore */ = {
+			isa = PBXTargetDependency;
+			target = 6B2F5703B9F76D1D2983A901 /* UsageCore target */;
+			targetProxy = 506D7F82091EE439E7EE89DA /* UsageCore proxy */;
+		};
+		291A62894A89E311F88316B5 /* Claude helper depends on UsageCore */ = {
+			isa = PBXTargetDependency;
+			target = 6B2F5703B9F76D1D2983A901 /* UsageCore target */;
+			targetProxy = 506D7F82091EE439E7EE89DA /* UsageCore proxy */;
+		};
+		2926A5B64D0EB654BBAF11AA /* UsageAppTests depends on UsageCore */ = {
+			isa = PBXTargetDependency;
+			target = 6B2F5703B9F76D1D2983A901 /* UsageCore target */;
+			targetProxy = 506D7F82091EE439E7EE89DA /* UsageCore proxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		F80FACE21F0F6D0B638CB60A /* UsageApp Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ENABLE_APP_SANDBOX = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSUIElement = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = org.usageapp.macos;
+			};
+			name = Debug;
+		};
+		A39C83BF4D7C9FC2381C9EDB /* UsageApp Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ENABLE_APP_SANDBOX = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSUIElement = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = org.usageapp.macos;
+			};
+			name = Release;
+		};
+		6A691152ED649395FAEA67D3 /* usageapp-claude-status Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		B5E1D147408B91E26FD71F1D /* usageapp-claude-status Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		313ECC5580F8D6D80F6044A2 /* UsageAppTests Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = org.usageapp.tests;
+			};
+			name = Debug;
+		};
+		8E0069ED6D8EC1D76C3DBCF6 /* UsageAppTests Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = org.usageapp.tests;
+			};
+			name = Release;
+		};
+		E20609128BE34B268B1C1700 /* Project Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		06D9FAC4492C016BD6137653 /* Project Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		8415FDFDE86FAB8377BAE852 /* UsageCore Debug */ = {
+			isa = XCBuildConfiguration;
+			name = Debug;
+			buildSettings = { DEFINES_MODULE = YES; SWIFT_INSTALL_OBJC_HEADER = NO; SKIP_INSTALL = YES; };
+		};
+		CAA3203820D149C133884322 /* UsageCore Release */ = {
+			isa = XCBuildConfiguration;
+			name = Release;
+			buildSettings = { DEFINES_MODULE = YES; SWIFT_INSTALL_OBJC_HEADER = NO; SKIP_INSTALL = YES; };
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		880E38FCA854AC2EA07AB183 /* UsageApp configurations */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = ( F80FACE21F0F6D0B638CB60A /* UsageApp Debug */, A39C83BF4D7C9FC2381C9EDB /* UsageApp Release */, );
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DAE01AA66CEDEFA0464E6599 /* usageapp-claude-status configurations */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = ( 6A691152ED649395FAEA67D3 /* usageapp-claude-status Debug */, B5E1D147408B91E26FD71F1D /* usageapp-claude-status Release */, );
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		019DF59C56E58947B6E0FEED /* UsageAppTests configurations */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = ( 313ECC5580F8D6D80F6044A2 /* UsageAppTests Debug */, 8E0069ED6D8EC1D76C3DBCF6 /* UsageAppTests Release */, );
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9CFF64D8AE28E83EB00193AA /* Project configurations */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = ( E20609128BE34B268B1C1700 /* Project Debug */, 06D9FAC4492C016BD6137653 /* Project Release */, );
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E077460FF18DC0C33825F0BF /* UsageCore configurations */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = ( 8415FDFDE86FAB8377BAE852 /* UsageCore Debug */, CAA3203820D149C133884322 /* UsageCore Release */, );
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 2DD2B225212C1DF17AC79F4F /* UsageApp project */;
+}

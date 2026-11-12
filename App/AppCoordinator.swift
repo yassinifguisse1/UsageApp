@@ -1,0 +1,162 @@
+import AppKit
+import SwiftUI
+
+@MainActor
+final class AppCoordinator: NSObject, NSApplicationDelegate, NSMenuDelegate {
+    private let model = UsageModel()
+    private var overlay: PanelController?
+    private var statusItem: NSStatusItem?
+    private var setupWindow: NSWindow?
+    private var timer: Timer?
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        overlay = PanelController(model: model)
+        installMenu()
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(screenChanged),
+            name: NSApplication.didChangeScreenParametersNotification, object: nil
+        )
+        NSWorkspace.shared.notificationCenter.addObserver(
+            self, selector: #selector(systemWoke),
+            name: NSWorkspace.didWakeNotification, object: nil
+        )
+        let timer = Timer(timeInterval: 1, repeats: true) { [weak self] _ in
+            Task { @MainActor in self?.tick() }
+        }
+        timer.tolerance = 0.15
+        RunLoop.main.add(timer, forMode: .common)
+        self.timer = timer
+        if !model.isDemo { model.refresh() }
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        timer?.invalidate()
+        model.stop()
+        NotificationCenter.default.removeObserver(self)
+        NSWorkspace.shared.notificationCenter.removeObserver(self)
+    }
+
+    private func installMenu() {
+        let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+        let image = NSImage(systemSymbolName: "gauge.with.dots.needle.33percent", accessibilityDescription: "UsageApp")
+            ?? NSImage(systemSymbolName: "chart.pie", accessibilityDescription: "UsageApp")
+        image?.isTemplate = true
+        item.button?.image = image
+        item.button?.toolTip = "UsageApp"
+        item.button?.setAccessibilityLabel("UsageApp")
+        let menu = NSMenu(title: "UsageApp")
+        menu.delegate = self
+        item.menu = menu
+        statusItem = item
+        menuNeedsUpdate(menu)
+    }
+
+    func menuNeedsUpdate(_ menu: NSMenu) {
+        menu.removeAllItems()
+        menu.addItem(item(overlay?.isShown == true ? "Hide Panel" : "Show Panel", action: #selector(togglePanel)))
+        menu.addItem(item("Refresh Now", action: #selector(refresh), key: "r"))
+        menu.addItem(item(model.isDemo ? "Switch to Live Usage" : "Switch to Demo Mode", action: #selector(toggleMode)))
+
+        let displays = NSMenu(title: "Display")
+        let primary = item("Primary Display (Automatic)", action: #selector(selectDisplay(_:)))
+        primary.state = overlay?.selectedDisplayID == nil ? .on : .off
+        displays.addItem(primary)
+        displays.addItem(.separator())
+        for screen in NSScreen.screens {
+            guard let identifier = PanelController.identifier(for: screen) else { continue }
+            let display = item(screen.localizedName, action: #selector(selectDisplay(_:)))
+            display.representedObject = identifier
+            display.state = overlay?.selectedDisplayID == identifier ? .on : .off
+            displays.addItem(display)
+        }
+        let displayItem = NSMenuItem(title: "Display", action: nil, keyEquivalent: "")
+        displayItem.submenu = displays
+        menu.addItem(displayItem)
+
+        menu.addItem(.separator())
+        menu.addItem(item("Usage & Setup…", action: #selector(openSetup), key: ","))
+        menu.addItem(item("Quit UsageApp", action: #selector(quit), key: "q"))
+    }
+
+    private func item(_ title: String, action: Selector, key: String = "") -> NSMenuItem {
+        let item = NSMenuItem(title: title, action: action, keyEquivalent: key)
+        item.target = self
+        return item
+    }
+
+    private func tick() {
+        model.tick(visible: overlay?.visible == true || setupWindow?.isVisible == true)
+        overlay?.updateCard()
+    }
+
+    @objc private func togglePanel() {
+        overlay?.toggle()
+        tick()
+    }
+
+    @objc private func refresh() {
+        model.refresh()
+        overlay?.updateCard()
+    }
+
+    @objc private func toggleMode() {
+        model.setDemo(!model.isDemo)
+        overlay?.updateCard()
+    }
+
+    @objc private func selectDisplay(_ sender: NSMenuItem) {
+        overlay?.chooseDisplay(sender.representedObject as? String)
+    }
+
+    @objc private func screenChanged() {
+        overlay?.updatePlacement()
+    }
+
+    @objc private func systemWoke() {
+        tick()
+        if !model.isDemo { refresh() }
+    }
+
+    @objc private func openSetup() {
+        let window = setupWindow ?? makeSetupWindow()
+        setupWindow = window
+        NSApp.activate()
+        window.makeKeyAndOrderFront(nil)
+        tick()
+    }
+
+    private func makeSetupWindow() -> NSWindow {
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 520, height: 690),
+            styleMask: [.titled, .closable, .resizable, .miniaturizable],
+            backing: .buffered,
+            defer: false
+        )
+        window.title = "Usage & Setup"
+        window.contentMinSize = NSSize(width: 360, height: 300)
+        window.isReleasedWhenClosed = false
+        window.contentView = NSHostingView(rootView: SetupView(
+            model: model, chooseExecutable: { [weak self] in self?.chooseExecutable() }
+        ))
+        window.center()
+        return window
+    }
+
+    private func chooseExecutable() {
+        guard let setupWindow else { return }
+        let picker = NSOpenPanel()
+        picker.message = "Select the Codex CLI executable."
+        picker.prompt = "Choose Executable"
+        picker.canChooseDirectories = false
+        picker.resolvesAliases = true
+        picker.showsHiddenFiles = true
+        picker.beginSheetModal(for: setupWindow) { [weak self] response in
+            guard response == .OK, let url = picker.url else { return }
+            self?.model.setCodexExecutable(url)
+        }
+    }
+
+    @objc private func quit() {
+        NSApp.terminate(nil)
+    }
+}
