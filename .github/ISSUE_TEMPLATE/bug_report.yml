@@ -1,0 +1,52 @@
+name: Bug report
+description: Something in UsageApp doesn't work as described.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Please don't paste tokens, prompts, or raw provider payloads. UsageApp never needs them to diagnose a problem.
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Provider
+      options: [Claude Code, Codex, Perplexity, The panel or app itself]
+    validations:
+      required: true
+  - type: input
+    id: state
+    attributes:
+      label: What the card shows
+      description: The state and message, for example "Setup required · Run codex login in Terminal".
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+  - type: input
+    id: app-version
+    attributes:
+      label: UsageApp version
+      description: From Finder → UsageApp → Get Info, or the release you downloaded.
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+    validations:
+      required: true
+  - type: input
+    id: cli
+    attributes:
+      label: CLI version
+      description: Output of `claude --version` or `codex --version`, if relevant.
+  - type: dropdown
+    id: install
+    attributes:
+      label: Installed with
+      options: [Homebrew, Release ZIP, Built from source]

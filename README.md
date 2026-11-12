@@ -1,5 +1,19 @@
 # UsageApp
 
+**See how much of your Claude Code, Codex, and Perplexity allowance is left, at a glance from the edge of your Mac display.**
+
+[![macOS CI](https://github.com/yassinifguisse1/UsageApp/actions/workflows/macos.yml/badge.svg)](https://github.com/yassinifguisse1/UsageApp/actions/workflows/macos.yml)
+[![Latest release](https://img.shields.io/github/v/release/yassinifguisse1/UsageApp)](https://github.com/yassinifguisse1/UsageApp/releases/latest)
+[![License: MIT](https://img.shields.io/github/license/yassinifguisse1/UsageApp)](LICENSE)
+![macOS 14+](https://img.shields.io/badge/macOS-14%2B-blue)
+
+<!-- Screenshot: add docs/images/panel.png and panel-dark.png (demo mode, panel plus one pinned card), then uncomment.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/panel-dark.png">
+  <img src="docs/images/panel.png" alt="UsageApp's allowance rings at the right edge of the display, with the Claude Code card pinned open" width="720">
+</picture>
+-->
+
 UsageApp puts Claude Code, Codex, and Perplexity allowance rings at the right edge of your Mac display. The Claude Code and Codex rings show the main short window when available. Perplexity shows a manually recorded Computer plan credit balance. Hover over a ring to preview its details, or click the ring to toggle the card. Use the pin button in the card to keep it open. Click the filled pin or the same ring to dismiss a pinned card. The gear at the bottom of the panel opens the same menu as the menu bar icon, including **Settings & Usage**, display selection, show/hide, and refresh.
 
 ## Install
@@ -8,7 +22,7 @@ UsageApp puts Claude Code, Codex, and Perplexity allowance rings at the right ed
 brew install --cask yassinifguisse1/tap/usageapp
 ```
 
-Or download `UsageApp-macos-universal.zip` from [GitHub Releases](https://github.com/yassinifguisse1/UsageApp/releases), check it with `shasum -a 256 -c UsageApp-macos-universal.zip.sha256`, unzip it, and move **UsageApp** to Applications. UsageApp runs on Apple silicon and Intel Macs with macOS 14 or later. Releases from 1.1.0 onward are signed with a Developer ID and notarized by Apple. Version 1.0.0 is ad hoc signed, so macOS blocks it until you allow it in **System Settings → Privacy & Security**.
+Or download `UsageApp-macos-universal.zip` from [GitHub Releases](https://github.com/yassinifguisse1/UsageApp/releases), check it with `shasum -a 256 -c UsageApp-macos-universal.zip.sha256`, unzip it, and move **UsageApp** to Applications. UsageApp runs on Apple silicon and Intel Macs with macOS 14 or later. Releases are signed with a Developer ID and notarized by Apple.
 
 ## Build and try the demo
 
