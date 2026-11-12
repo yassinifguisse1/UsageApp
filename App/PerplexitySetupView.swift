@@ -13,6 +13,9 @@ struct PerplexitySetupView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Enter the plan credit balance and allowance from Perplexity Usage. Enter the reset time if it’s shown.")
                 .foregroundStyle(.secondary)
+            Text("Beta: Perplexity has no usage interface for local apps, so readings are entered by hand.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
             Link("Open Perplexity Usage", destination: URL(string: "https://www.perplexity.ai/account/usage")!)
 
             Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 8) {

@@ -91,3 +91,17 @@ import UsageCore
         try ClaudeUsageParser.parse(Data("[]".utf8), observedAt: observed)
     }
 }
+
+@Test func unknownLimitShapesAreDistinguishedFromAbsentLimits() throws {
+    let codexUnknown = Data(#"{"rateLimits":{"primary":{"usedFraction":0.4}}}"#.utf8)
+    #expect(try CodexUsageParser.parse(codexUnknown).isEmpty)
+    #expect(CodexUsageParser.reportsLimits(in: codexUnknown))
+    #expect(!CodexUsageParser.reportsLimits(in: Data(#"{"rateLimits":{"primary":null,"secondary":null}}"#.utf8)))
+    #expect(!CodexUsageParser.reportsLimits(in: Data("{}".utf8)))
+
+    let claudeUnknown = Data(#"{"rate_limits":{"five_hours":{"used":40}}}"#.utf8)
+    #expect(try ClaudeUsageParser.parse(claudeUnknown, observedAt: Date()).windows.isEmpty)
+    #expect(ClaudeUsageParser.reportsLimits(in: claudeUnknown))
+    #expect(!ClaudeUsageParser.reportsLimits(in: Data(#"{"rate_limits":{}}"#.utf8)))
+    #expect(!ClaudeUsageParser.reportsLimits(in: Data(#"{"context_window":{"used_percentage":0}}"#.utf8)))
+}

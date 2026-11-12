@@ -18,8 +18,11 @@ public struct ClaudeProvider: UsageProvider {
 
     public func read() async -> ProviderReading {
         do {
-            let sample = try store.read()
+            let (sample, unrecognizedAt) = try store.readState()
             let cutoff = [ignoreBefore, connection.installedAt].compactMap { $0 }.max()
+            if let unrecognizedAt, cutoff.map({ unrecognizedAt > $0 }) ?? true {
+                return ProviderReading(provider: provider, outcome: .unavailable(provider.unrecognizedFormatMessage))
+            }
             if let sample, !sample.windows.isEmpty, cutoff.map({ sample.observedAt > $0 }) ?? true {
                 return ProviderReading(provider: provider, outcome: .sample(sample))
             }

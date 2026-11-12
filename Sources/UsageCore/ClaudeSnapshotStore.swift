@@ -19,6 +19,28 @@ public struct ClaudeSnapshotStore: Sendable {
 
     /// nil means the bridge has not successfully recorded a status-line callback yet.
     public func read() throws -> UsageSample? {
+        try readState().sample
+    }
+
+    /// Also reports when Claude Code last sent rate limits in a shape this version cannot read.
+    public func readState() throws -> (sample: UsageSample?, unrecognizedAt: Date?) {
+        guard let record = try readRecord() else { return (nil, nil) }
+        let windows = ClaudeWindow.allCases.compactMap { kind -> UsageWindow? in
+            guard let value = record.windows[kind.rawValue], (0...100).contains(value.usedPercent) else {
+                return nil
+            }
+            return kind.window(
+                usedPercent: value.usedPercent,
+                resetsAt: ProviderJSON.reset(value.resetsAt)
+            )
+        }
+        return (
+            UsageSample(observedAt: Date(timeIntervalSince1970: record.observedAt), windows: windows),
+            record.unrecognizedAt.map(Date.init(timeIntervalSince1970:))
+        )
+    }
+
+    private func readRecord() throws -> Record? {
         let data: Data
         do {
             let file = try FileHandle(forReadingFrom: snapshotURL)
@@ -32,16 +54,7 @@ public struct ClaudeSnapshotStore: Sendable {
         guard record.version == 1, record.observedAt.isFinite, record.observedAt > 0 else {
             throw StoreError.invalidSnapshot
         }
-        let windows = ClaudeWindow.allCases.compactMap { kind -> UsageWindow? in
-            guard let value = record.windows[kind.rawValue], (0...100).contains(value.usedPercent) else {
-                return nil
-            }
-            return kind.window(
-                usedPercent: value.usedPercent,
-                resetsAt: ProviderJSON.reset(value.resetsAt)
-            )
-        }
-        return UsageSample(observedAt: Date(timeIntervalSince1970: record.observedAt), windows: windows)
+        return record
     }
 
     public func capture(_ payload: Data, observedAt: Date = Date()) throws {
@@ -54,21 +67,30 @@ public struct ClaudeSnapshotStore: Sendable {
         defer { _ = Darwin.close(lock) }
         guard flock(lock, LOCK_EX) == 0 else { throw StoreError.fileOperation }
 
-        if let previous = try? read() {
-            // A startup callback without limits must not replace or re-date a usable sample.
-            if sample.windows.isEmpty { return }
-            if !previous.windows.isEmpty,
-               sample.observedAt.timeIntervalSince1970 < previous.observedAt.timeIntervalSince1970 { return }
-        }
-
         let windows = sample.windows.reduce(into: [String: Record.Window]()) { result, window in
             result[window.id] = Record.Window(
                 usedPercent: window.usedPercent, resetsAt: window.resetsAt?.timeIntervalSince1970
             )
         }
-        let data = try JSONEncoder().encode(Record(
-            version: 1, observedAt: sample.observedAt.timeIntervalSince1970, windows: windows
-        ))
+        var record = Record(version: 1, observedAt: sample.observedAt.timeIntervalSince1970, windows: windows)
+        let previous = try? readRecord()
+        if sample.windows.isEmpty {
+            if ClaudeUsageParser.reportsLimits(in: payload) {
+                // Keep the last usable reading, but note that the limits arrived in an unknown shape.
+                record = Record(
+                    version: 1,
+                    observedAt: previous?.observedAt ?? record.observedAt,
+                    windows: previous?.windows ?? [:],
+                    unrecognizedAt: record.observedAt
+                )
+            } else if previous != nil {
+                // A startup callback without limits must not replace or re-date a usable sample.
+                return
+            }
+        } else if let previous, !previous.windows.isEmpty, record.observedAt < previous.observedAt {
+            return
+        }
+        let data = try JSONEncoder().encode(record)
         try replaceSnapshot(with: data)
     }
 
@@ -105,5 +127,6 @@ public struct ClaudeSnapshotStore: Sendable {
         let version: Int
         let observedAt: Double
         let windows: [String: Window]
+        var unrecognizedAt: Double?
     }
 }

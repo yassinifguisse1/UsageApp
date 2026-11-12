@@ -32,7 +32,7 @@ struct UsageDetails: View {
                     .help(isPinned ? "Unpin and close details" : "Keep details open")
                 }
                 if isDemo || reading.provider == .perplexity && reading.observedAt != nil {
-                    Text(isDemo ? "Demo" : "Manual")
+                    Text(isDemo ? "Demo" : "Manual · Beta")
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(secondary)
                         .padding(.horizontal, 7)

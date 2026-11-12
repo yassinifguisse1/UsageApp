@@ -42,6 +42,19 @@ public enum CodexUsageParser {
         }
     }
 
+    /// True when the result carries at least one window slot, recognized or not.
+    public static func reportsLimits(in data: Data) -> Bool {
+        (try? ProviderJSON.object(from: data)).map(reportsLimits) ?? false
+    }
+
+    static func reportsLimits(_ result: ProviderJSON.Object) -> Bool {
+        let buckets = [result["rateLimits"]] + (result["rateLimitsByLimitId"] as? ProviderJSON.Object ?? [:]).values
+        return buckets.contains { bucket in
+            guard let bucket = bucket as? ProviderJSON.Object else { return false }
+            return ["primary", "secondary"].contains { bucket[$0] is ProviderJSON.Object }
+        }
+    }
+
     private static func durationLabel(_ value: Any?) -> String? {
         guard let number = ProviderJSON.number(value),
               let minutes = Int(exactly: number), minutes > 0 else { return nil }

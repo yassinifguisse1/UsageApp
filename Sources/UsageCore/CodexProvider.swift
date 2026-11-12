@@ -50,9 +50,13 @@ public struct CodexProvider: UsageProvider {
             let result = try CodexRPC(executable: executable, timeout: timeout).fetchLimits()
             if let result {
                 let windows = CodexUsageParser.windows(from: result)
-                outcome = windows.isEmpty
-                    ? .unavailable("Codex did not report any allowance windows for this account.")
-                    : .sample(UsageSample(observedAt: Date(), windows: windows))
+                outcome = if !windows.isEmpty {
+                    .sample(UsageSample(observedAt: Date(), windows: windows))
+                } else if CodexUsageParser.reportsLimits(result) {
+                    .unavailable(Provider.codex.unrecognizedFormatMessage)
+                } else {
+                    .unavailable("Codex did not report any allowance windows for this account.")
+                }
             } else {
                 outcome = .setupRequired("Run codex login in Terminal and sign in with ChatGPT.")
                 action = .signInToCodex

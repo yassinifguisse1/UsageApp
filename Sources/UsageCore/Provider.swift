@@ -11,6 +11,10 @@ public enum Provider: String, CaseIterable, Sendable {
         }
     }
 
+    public var unrecognizedFormatMessage: String {
+        "\(name) reported usage in a format this version of UsageApp doesn’t recognize. Check for a UsageApp update."
+    }
+
     public var staleAfter: TimeInterval {
         switch self {
         case .claude: 15 * 60
