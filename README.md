@@ -3,9 +3,10 @@
 **See how much of your Claude Code, Codex, and Perplexity allowance is left, at a glance from the edge of your Mac display.**
 
 [![macOS CI](https://github.com/yassinifguisse1/UsageApp/actions/workflows/macos.yml/badge.svg)](https://github.com/yassinifguisse1/UsageApp/actions/workflows/macos.yml)
-[![Latest release](https://img.shields.io/github/v/release/yassinifguisse1/UsageApp)](https://github.com/yassinifguisse1/UsageApp/releases/latest)
 [![License: MIT](https://img.shields.io/github/license/yassinifguisse1/UsageApp)](LICENSE)
 ![macOS 14+](https://img.shields.io/badge/macOS-14%2B-blue)
+
+**[Download UsageApp v1.0.0 Preview](https://github.com/yassinifguisse1/UsageApp/releases/tag/preview/v1.0.0)** · [Install instructions](#install)
 
 <!-- Screenshot: add docs/images/panel.png and panel-dark.png (demo mode, panel plus one pinned card), then uncomment.
 <picture>
@@ -18,11 +19,12 @@ UsageApp puts Claude Code, Codex, and Perplexity allowance rings at the right ed
 
 ## Install
 
-```sh
-brew install --cask yassinifguisse1/tap/usageapp
-```
+The v1.0.0 preview runs on Apple silicon and Intel Macs with macOS 14 or later. **This preview is ad hoc signed and not notarized.** macOS may block it on first launch.
 
-Or download `UsageApp-macos-universal.zip` from [GitHub Releases](https://github.com/yassinifguisse1/UsageApp/releases), check it with `shasum -a 256 -c UsageApp-macos-universal.zip.sha256`, unzip it, and move **UsageApp** to Applications. UsageApp runs on Apple silicon and Intel Macs with macOS 14 or later. Releases are signed with a Developer ID and notarized by Apple.
+1. Download the [macOS ZIP](https://github.com/yassinifguisse1/UsageApp/releases/download/preview/v1.0.0/UsageApp-macos-universal.zip) and the [SHA-256 checksum](https://github.com/yassinifguisse1/UsageApp/releases/download/preview/v1.0.0/UsageApp-macos-universal.zip.sha256) into the same folder.
+2. Open Terminal in that folder and run `shasum -a 256 -c UsageApp-macos-universal.zip.sha256`. The ZIP should report `OK`.
+3. Unzip the download, drag **UsageApp.app** into **Applications**, and open it.
+4. Look for the **UsageApp** icon in the macOS menu bar. Try **Demo** first or choose **Switch to Live Usage** to connect your providers.
 
 ## Build and try the demo
 
